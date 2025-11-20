@@ -1,0 +1,2985 @@
+<SYSTEM>This is the complete documentation for Zero to Nix, including the learning journey (start) and concept pages.</SYSTEM>
+
+<INSTRUCTIONS>Learning journey (start) and concept page items begin and end with a --- and all page titles are in bold.</INSTRUCTIONS>
+
+# Zero to Nix
+
+> Your guide to learning Nix and flakes
+
+Zero to Nix is a flake-centric resource for learning Nix created by [Determinate Systems](https://determinate.systems/llms.txt). It takes you on a [learning journey](#start-pages) from installing Nix to exploring Nix development environments to building Nix packages and more. It also offers a series of [concept pages](#concept-pages) covering some of the trickier corners of Nix.
+
+## Start pages
+
+---
+
+**Get Nix running on your system**
+
+Published: 
+URL: https://zero-to-nix.com//start/install
+
+<Admonition success open title="The target audience for the quick start" id="quick-start-audience">
+We wrote this [Zero to Nix][z2n] quick start with one specific audience in mind: people who have heard about [Nix] but don't yet know much about it and aren't quite sure where to start with the learning process.
+It's intended less as a how-to guide for using Nix in your everyday workflows and more to provide a glimpse into Nix's feature set and to provide some of those "a-ha!" moments that make you feel empowered to go further.
+
+If you're already fairly familiar with Nix and are looking for specific guidance on using it in your day job, you may still get some value out of the quick start but you may be better served with more practical, guide-driven resources like [nix.dev].
+</Admonition>
+
+**Welcome**!
+It's great to see that you're interested in [Nix].
+In this [quick start][start], we'll get Nix installed on your system and provide you with a small taste of Nix's feature set by accomplishing some practical things, such as [creating a development environment][dev] and [building a package][build] using Nix.
+
+We recommend installing Nix using the [Determinate Nix installer][nix-installer], a tool from [Determinate Systems][detsys] that tailors the installation process to your system.
+The installer supports these platforms:
+
+- macOS on 64-bit ARM and 64-bit AMD/Intel
+- Linux on 64-bit ARM and 64-bit AMD/Intel
+- [Windows Subsystem for Linux][wsl] (WSL) on 64-bit ARM and 64-bit AMD/Intel
+- [Podman] Linux containers
+- [Docker] containers
+- [Valve Steam Deck][steamdeck] (SteamOS)
+
+## Run the installer \{#run}
+
+```shell title="One command to install Nix"
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
+
+If you have concerns about the "curl to Bash" approach you have two options:
+
+1. You can download a binary for the most recent version of the Determinate Nix Installer directly from the [releases] page and run it.
+1. You can examine the installation script [here][script] then download and run it:
+
+   ```shell title="Inspect the script, then install"
+   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix > nix-installer.sh
+   chmod +x nix-installer.sh
+   ./nix-installer.sh install
+   ```
+
+<Admonition info title="Why aren't we using the official Nix installation script here?" id="why-nix-installer">
+We believe that the Determinate Nix Installer provides a smoother experience for people who are new to Nix than the [official Nix installation script][official].
+Unlike many tools, Nix needs to make several changes to your system in order to work properly, such as creating a new `/nix` directory, configuring your shell profile, and creating several new system users and groups.
+
+The Determinate Nix Installer improves on the official Nix installation script by enabling you to undo, with a single command, all of the system changes introduced by the installation process.
+It also installs Nix with [Nix flakes][flakes] enabled while the official installer requires you to enable flakes manually.
+
+See the [Uninstalling Nix][uninstall] guide if you need to uninstall Nix or the [Determinate Nix Installer][nix-installer] concept doc if you'd like more background.
+
+</Admonition>
+
+Validate the displayed plan and approve it to begin the installation process.
+Once the installer has finished, you should see `Nix was installed successfully!` in your terminal.
+
+Open a new terminal session and the `nix` executable should be in your `$PATH`.
+To verify that:
+
+```shell title="Display the Nix version"
+nix --version
+```
+
+This should print the version information for Nix.
+
+:rocket: **Success**!
+You now have Nix installed and ready to go on your system.
+
+<Admonition info title="How to contribute to Zero to Nix" id="contributing">
+  If you're interested in contributing to Zero to Nix, see the
+  [manual][contributing] in the project [repo] for some suggestions.
+</Admonition>
+
+[apfs]: https://es.wikipedia.org/wiki/Apple_File_System
+[build]: /start/nix-build
+[contributing]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/CONTRIBUTING.md
+[detsys]: https://determinate.systems
+[dev]: /start/nix-develop
+[docker]: https://docker.com
+[flakes]: /concepts/flakes
+[json]: https://json.org
+[multi]: https://nixos.org/manual/nix/stable/installation/multi-user
+[nix]: https://nixos.org
+[nix-installer]: /concepts/nix-installer
+[nix.dev]: https://nix.dev
+[official]: https://nixos.org/download
+[podman]: https://podman.io
+[releases]: https://github.com/DeterminateSystems/nix-installer/releases
+[repo]: https://github.com/DeterminateSystems/zero-to-nix
+[script]: https://raw.githubusercontent.com/DeterminateSystems/nix-installer/main/nix-installer.sh
+[start]: /start
+[steamdeck]: https://steamdeck.com
+[store]: /concepts/nix-store
+[systemd]: https://systemd.io
+[uninstall]: /start/uninstall
+[wsl]: https://learn.microsoft.com/windows/wsl
+[z2n]: /
+
+---
+
+**Run a program with Nix**
+
+Published: 
+URL: https://zero-to-nix.com//start/nix-run
+
+In the last section, we installed Nix using the [Determinate Nix Installer][nix-installer].
+Now we can dive in and use Nix to run an actual program.
+Let's try running the delightful [ponysay]:
+
+```shell title="Pass a string to Ponysay"
+echo "Hello Nix" | nix run "https://flakehub.com/f/NixOS/nixpkgs/*#ponysay"
+```
+
+:rocket: **Success**!
+You should see a charming equine greeting in your console.
+
+<Admonition warning title="This could take a while" id="nix-run-loading">
+  The first time you run a program using `nix run` it's likely to be a slow
+  operation. That's because Nix needs to build the program's [package][packages]
+  from scratch&mdash;or download it from a known [cache]&mdash;and store it in
+  the [Nix store][store]. This is in contrast to most [package managers][pkg],
+  which install things more quickly because they download pre-built archives
+  like tarballs. Future `nix run` invocations should be instantaneous, as Nix
+  doesn't need to build the package again.
+</Admonition>
+
+## Explanation
+
+What happened here? The [Nix] CLI did a few things:
+
+- It used the `nixpkgs` [flake reference][ref] to pull in some Nix code and targeted the `ponysay` [flake output][output] (more on this later).
+- It built the [`ponysay` package][ponysay] and stored the result in the [Nix store][store].
+- It ran the executable at `bin/ponysay` from the `ponysay` package.
+
+In Nix, every program is part of a [package][packages].
+Packages are built using the [Nix language][derivations].
+The `ponysay` package has a single program (also called `ponysay`) but packages can contain multiple programs as well as man pages, configuration files, and more.
+The [`ffmpeg`][ffmpeg-pkg] package, for example, provides both [ffmpeg] and [ffprobe].
+
+<Admonition success open title="Install and run in one command" id="nix-run-no-install">
+You may have noticed that [`nix run`][nix-run] doesn't require anything like a `nix install` command.
+This makes it handy for use cases like shell scripting or experimenting with in-progress tools.
+
+For more on `nix run`, see [Using Nix to run software with no installation steps][nix-run-post] on the [Determinate Systems blog][blog].
+
+</Admonition>
+
+**Congrats**!
+You've just run a program using the Nix CLI and learned a little bit about some core Nix concepts.
+You're now ready to explore Nix development environments.
+
+[blog]: https://determinate.systems/posts
+[cache]: /concepts/caching
+[derivations]: /concepts/nix-language#derivations
+[ffmpeg]: https://ffmpeg.org
+[ffmpeg-pkg]: https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/libraries/ffmpeg/generic.nix
+[ffprobe]: https://ffmpeg.org/ffprobe.html
+[nix]: /concepts/nix
+[nix-installer]: /concepts/nix-installer
+[nix-run]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-run
+[nix-run-post]: https://determinate.systems/posts/nix-run
+[nixpkgs]: /concepts/nixpkgs
+[output]: /concepts/flakes#outputs
+[packages]: /concepts/packages
+[ponysay]: https://github.com/erkin/ponysay
+[pkg]: /concepts/package-management
+[ref]: /concepts/flakes#references
+[store]: /concepts/nix-store
+[symlinked]: https://en.wikipedia.org/wiki/Symbolic_link
+
+---
+
+**Explore Nix development environments**
+
+Published: 
+URL: https://zero-to-nix.com//start/nix-develop
+
+One of Nix's key features for developing software is Nix [development environments][dev].
+You can define development environments of any complexity using the [Nix language][language].
+We'll cover that a bit later, but for now let's get a feel for what a Nix development environment is and how it works.
+
+The [`nix develop`][nix-develop] command activates a Nix environment:
+
+```shell title="Enter a Nix development environment defined in an external flake"
+nix develop "https://flakehub.com/f/DeterminateSystems/zero-to-nix/*#example"
+```
+
+<Admonition warning title="This could take a while" id="nix-develop-loading">
+  The first time you activate a Nix development environment using `nix develop`
+  it's likely to be a slow operation. That's because Nix needs to build every
+  [package][packages] included in the environment from scratch. This is in
+  contrast to most [package managers][pkg], which install things more quickly
+  because they download pre-built archives like tarballs. Future `nix develop`
+  invocations should be much faster, as Nix doesn't need to build the packages
+  again.
+</Admonition>
+
+You should be greeted by a new shell prompt, something like this:
+
+```shell title="Shell prompt in the Nix development environment"
+(nix:zero-to-nix-env) bash-5.2$
+```
+
+:rocket: **Success**!
+You're now in a [Bash] environment that includes [curl] and [Git].
+You may already have both in your environment, but run these commands to see that something new is happening:
+
+```shell title="Ensure that curl and Git are installed"
+type curl
+type git
+```
+
+For curl, for example, you should see a strange path like this (the hash part should be different on your machine):
+
+<NixStorePath pkg="curl-8.1.1-bin" bin="curl" />
+
+What happened here? The [Nix] CLI did a few things:
+
+- It used the `https://flakehub.com/f/DeterminateSystems/zero-to-nix/*#example` [flake reference][flakes] to pull in some Nix code and built a specific [flake output][output] (more on this later).
+- It built the [packages] specified in the environment configuration (again, more on this later).
+- It set up an environment with a [`PATH`][path] that enables the `git` and `curl` packages to be discovered in the [Nix store][store].
+
+Two other things that you can provide in Nix development environments:
+
+1. Although this example doesn't include one, you can define _shell hooks_, which are arbitrary shell code that runs whenever the environment starts up.
+   Some example use cases for shell hooks:
+
+   - `echo` information about the environment to the console whenever the environment is activated
+   - Run things like checks and linters
+   - Ensure that other desired hooks, like [Git hooks][hooks], are properly set up.
+     Run this to see an example shell hook:
+
+     ```shell title="Run a shell hook"
+     nix develop "github:DeterminateSystems/zero-to-nix#hook"
+     ```
+
+1. Nix development environments support environment variables as well.
+   Run `echo $FUNNY_JOKE` to access a (hilarious) value that's available only in the Nix environment.
+   Some example use cases for environment variables:
+   - Set logging levels using `LOG_LEVEL` or whatever is appropriate for the tools you're using.
+   - Set the environment using variables like `NODE_ENV` (for [Node.js]) to `development`, `dev`, and so on.
+
+Let's leave the Nix development environment to prepare for the next section:
+
+```shell title="Leave the environment"
+exit
+```
+
+If you have [Git] installed, check your `PATH` for it using `type git`.
+It should be at a global path like `/usr/bin/git`.
+And if you run `echo $FUNNY_JOKE` again you should get an empty string (unless you happen to have that variable set on your machine!).
+
+## Run commands inside the development environment
+
+While it's fun to explore the environment, you don't always want to be inside the environment to use it.
+The `nix develop` command provides a `--command` (or `-c`) flag that you can use to run commands that _use_ the environment but _from_ your current environment.
+Here are some examples for the environment we used earlier:
+
+```shell title="Layer multiple environments"
+nix develop "https://flakehub.com/f/DeterminateSystems/zero-to-nix/*#example" --command git help
+nix develop "https://flakehub.com/f/DeterminateSystems/zero-to-nix/*#example" --command curl https://example.com
+```
+
+In both cases, you're running a package in the [Nix store][store] and nothing from your global environment.
+As you can see, Nix development environments are [_hermetic_][hermeticity] in that they're isolated from the surrounding environment (such as your environment variables and paths like `/bin` and `/usr/bin`).
+
+## Language-specific environments
+
+As we did in the [last section][last], let's get a bit more specific and explore how Nix can benefit more specific programming environments.
+Select one of these programming languages:
+
+<Languages />
+
+Now explore the Nix development environment for <Language />:
+
+<SpecificLanguage lang="C++">
+```shell title="Explore a development environment for C++"
+nix develop "github:DeterminateSystems/zero-to-nix#cpp"
+```
+
+First, let's see the Nix store path for [CMake]:
+
+```shell title="Get path information for CMake"
+type cmake
+```
+
+Check the current CMake version:
+
+```shell title="Check CMake's version"
+cmake --version
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+```shell title="Explore a development environment for Haskell"
+nix develop "github:DeterminateSystems/zero-to-nix#haskell"
+```
+
+First, let's see the Nix store path for the [Glasgow Haskell Compiler][ghc] (GHC):
+
+```shell title="See the store path for GHC"
+type ghc
+```
+
+Check the current GHC version:
+
+```shell title="Check the GHC's version"
+ghc --version
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+```shell title="Explore a development environment for JavaScript"
+nix develop "github:DeterminateSystems/zero-to-nix#javascript"
+```
+
+First, let's see the Nix store path for [Node.js]:
+
+```shell title="See the store path for Node.js"
+type node
+```
+
+Now use Node to run a program:
+
+```shell title="Check the Node.js version"
+node --eval "console.log('1 + 1 = ' + (1 + 1))"
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+```shell title="Explore a development environment for Python"
+nix develop "github:DeterminateSystems/zero-to-nix#python"
+```
+
+First, let's see the Nix store path for Python:
+
+```shell title="See the store path for Python"
+type python
+```
+
+Now use Python to run a program:
+
+```shell title="Use Python to run a simple program"
+python -c "print(1 + 1)"
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+```shell title="Explore a development environment for Go"
+nix develop "github:DeterminateSystems/zero-to-nix#go"
+```
+
+First, let's see the Nix store path for the [Go] CLI:
+
+```shell title="See the store path for Go"
+type go
+```
+
+Now check the Go version:
+
+```shell title="Check the Go version"
+go version
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+```shell title="Explore a development environment for Rust"
+nix develop "github:DeterminateSystems/zero-to-nix#rust"
+```
+
+First, let's see the Nix store path for [cargo]:
+
+```shell title="See the store path for Cargo"
+type cargo
+```
+
+Now create a [Rust] project in the current directory and run the example:
+
+```shell title="Initialize a Rust project and run it"
+cargo init ./zero-to-nix-rs
+cd ./zero-to-nix-rs
+cargo run
+```
+
+You should see `Hello, world!`.
+
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+```shell title="Explore a development environment for Scala"
+nix develop "github:DeterminateSystems/zero-to-nix#scala"
+```
+
+First, let's see the Nix store path for [sbt]:
+
+```shell title="See the store path for sbt"
+type sbt
+```
+
+Check the sbt version inside the environment:
+
+```shell title="Check the sbt version"
+sbt --version
+```
+
+</SpecificLanguage>
+
+Like usual, run `exit` to leave the Nix environment and return to your usual environment.
+
+## Beyond language-specific environments
+
+In the [previous section](#language-specific-environments), we explored Nix environments tailored to specific programming languages.
+But Nix environments are infinitely flexible, enabling you to combine whichever packages you like.
+Let's explore an example of this:
+
+```shell title="Activate a multi-language development environment"
+nix develop "https://flakehub.com/f/DeterminateSystems/zero-to-nix/*#multi"
+```
+
+This Nix environment has several tools available:
+
+* [Python]
+* [kubectl]
+* [OpenTofu]
+* [OpenSSL]
+
+As in the previous examples, you can run commands like `type python` and `type kubectl` to see that these tools are all discoverable in the [Nix store][store] and not somewhere like `/usr/bin`.
+This list could easily include 100 packages.
+It's up to you.
+We won't cover _how_ to create these environments just yet, but we hope that you come away from this guide with a basic sense of what Nix development environments provide.
+
+<Admonition
+  success
+  open
+  title="Nix development environments and direnv"
+  id="nix-develop-direnv"
+>
+  [direnv] is a popular tool that automatically loads specific environment
+  variables whenever you `cd` into a directory (and then unloads those variables
+  when you `cd` out of the directory). The combination of direnv and Nix can be
+  quite powerful, enabling you to automatically load Nix development
+  environments whenever you navigate to a directory. For more info, see
+  [Effortless dev environments with Nix and direnv][nix-direnv] on the
+  [Determinate Systems blog][blog].
+</Admonition>
+
+## From a local flake \{#flake}
+
+Earlier in this guide, we activated a Nix development environment defined in a [flake][flakes] on [FlakeHub].
+While using an environment in this way is helpful, it's more common to use a development environment defined in a local flake in the current directory.
+
+First, tell us which language you prefer:
+
+<Languages />
+
+To get started in your <Language /> project, create an empty directory and initialize a [flake template][templates]:
+
+<SpecificLanguage lang="C++">
+```shell title="Initialize a flake template for C++"
+mkdir nix-cpp-dev && cd nix-cpp-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#cpp-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+```shell title="Initialize a flake template for Haskell"
+mkdir nix-haskell-dev && cd nix-haskell-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#haskell-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+```shell title="Initialize a flake template for JavaScript"
+mkdir nix-javascript-dev && cd nix-javascript-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#javascript-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+```shell title="Initialize a flake template for Python"
+mkdir nix-python-dev && cd nix-python-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#python-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+```shell title="Initialize a flake template for Go"
+mkdir nix-go-dev && cd nix-go-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#go-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+```shell title="Initialize a flake template for Rust"
+mkdir nix-rust-dev && cd nix-rust-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#rust-dev"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+```shell title="Initialize a flake template for Scala"
+mkdir nix-scala-dev && cd nix-scala-dev
+nix flake init --template "github:DeterminateSystems/zero-to-nix#scala-dev"
+```
+</SpecificLanguage>
+
+Once the template has been initialized, run `ls .` to see the contents of the directory, which should include two important files:
+
+- The `flake.nix` file defines the [flake][flakes] for your project.
+- The `flake.lock` [pins][pinning] all of the [flake inputs][inputs]&mdash;essentially the Nix dependencies&mdash;in your `flake.nix` file to specific [Git revisions][rev].
+
+One of the [flake outputs][output] of this Nix [flake][flakes] is a [development environment][dev] for <Language />.
+To enter that development environment:
+
+```shell title="Enter a development environment in the current flake"
+nix develop
+```
+
+Now that we've entered the development environment, we can do some exploring, starting with [Nix store paths][paths].
+
+<SpecificLanguage lang="C++">
+Ordinarily when you run `type gcc` on a Unix system, you get a path like `/usr/bin/gcc`.
+Try running it in the Nix development environment:
+
+```shell title="Get information about the gcc executable"
+type gcc
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for gcc"
+gcc is /nix/store/nbrvvx1gyq3as3ghmjz62wlgd8f3zfpf-gcc-wrapper-11.3.0/bin/gcc
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+Ordinarily when you run `type ghc` on a Unix system, you get a path like `/usr/bin/ghc`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for ghc"
+type ghc
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for ghc"
+ghc is /nix/store/f3qnvw5gxgxxpr275kf97pfcy2n1gv79-ghc-9.2.4/bin/ghc
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+Ordinarily when you run `type node` on a Unix system, you get a path like `/usr/bin/node`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for Node.js"
+type node
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for Node.js"
+node is /nix/store/i88kh2fd03f5fsd3a948s19gliggd2wd-nodejs-18.12.1/bin/node
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+Ordinarily when you run `type python` on a Unix system, you get a path like `/usr/bin/python`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for Python"
+type python
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for Python"
+python is /nix/store/a9mmam4km4bjnkzl62533w7d0wyrhrj9-python3-3.13.6/bin/python
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+Ordinarily when you run `type go` on a Unix system, you get a path like `/usr/bin/go`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for Go"
+type go
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for Go"
+go is /nix/store/5bcx8rv6sy33xsf5dzkp9q8lfdqrsiwa-go-1.19.4/bin/go
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+Ordinarily when you run `type cargo` on a Unix system, you get a path like `/usr/bin/cargo`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for cargo"
+type cargo
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for cargo"
+cargo is /nix/store/zc1nr87147gvmg5nqci8q5cfnzg82vwp-rust-default-1.64.0/bin/cargo
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+Ordinarily when you run `type sbt` on a Unix system, you get a path like `/usr/bin/sbt`.
+Try running it in the Nix development environment:
+
+```shell title="Get path information for sbt"
+type sbt
+```
+
+You should see a (rather strange) path like this:
+
+```shell title="Path information for sbt"
+sbt is /nix/store/p0hca7x8g45p5hnh0xjzy5s2bcpy1i9l-sbt-1.7.3/bin/sbt
+```
+
+</SpecificLanguage>
+
+Probably not what you expected! What happened here? A few things:
+
+- Nix looked at the `devShells` [flake outputs][output] in `flake.nix` to figure out which [Nix packages][packages] to include in the development environment (Nix specifically looked at the `packages` array).
+- Nix built the packages specified under `packages` and stored them in the
+  [Nix store][store] under `/nix/store`.
+
+[bash]: https://gnu.org/software/bash
+[blog]: https://determinate.systems/posts
+[cargo]: https://doc.rust-lang.org/stable/cargo
+[cmake]: https://cmake.org
+[curl]: https://curl.se
+[dev]: /concepts/dev-env
+[direnv]: https://direnv.net
+[flakehub]: https://flakehub.com
+[flakes]: /concepts/flakes
+[ghc]: https://haskell.org/ghc
+[git]: https://git-scm.com
+[go]: https://go.dev
+[hermeticity]: /concepts/hermeticity
+[hooks]: https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks
+[inputs]: /concepts/flakes#inputs
+[installer]: /concepts/nix-installer
+[kubectl]: https://kubernetes.io/docs/reference/kubectl
+[language]: /concepts/nix-language
+[last]: /start/nix-run
+[nix]: /concepts/nix
+[nix-develop]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-develop
+[nix-direnv]: https://determinate.systems/posts/nix-direnv
+[node.js]: https://nodejs.org
+[npm]: https://npmjs.com
+[openssl]: https://openssl.org
+[opentofu]: https://opentofu.org
+[output]: /concepts/flakes#outputs
+[packages]: /concepts/packages
+[path]: https://en.wikipedia.org/wiki/PATH_(variable)
+[paths]: /concepts/nix-store#store-paths
+[pinning]: /concepts/pinning
+[pkg]: /concepts/package-management
+[python]: https://python.org
+[rev]: https://git-scm.com/docs/revisions
+[rust]: https://rust-lang.org
+[sbt]: https://scala-sbt.org
+[store]: /concepts/nix-store
+[templates]: /concepts/flakes#templates
+
+---
+
+**Build a package using Nix**
+
+Published: 
+URL: https://zero-to-nix.com//start/nix-build
+
+While [Nix] can do many things, [package management][pkg] is the thing that it's perhaps best known for. In this tutorial, we'll use our [installed Nix CLI][install] to build and run some Nix [packages] included in [Nixpkgs]. Later in the guide we'll build and run a Nix package defined in a local [flake].
+
+## Build a package from Nixpkgs \{#nixpkgs}
+
+Let's start by building [bat], a syntax-highlighted version of [cat] written in [Rust] that has a Nix package defined in [Nixpkgs], in an empty directory (make sure to run this in a directory where you have write access):
+
+```shell title="Build the bat package locally"
+mkdir build-nix-package && cd build-nix-package
+nix build "https://flakehub.com/f/NixOS/nixpkgs/*#bat"
+```
+
+Here, `nixpkgs` is a [flake reference][ref] to the [NixOS/nixpkgs][nixpkgs-repo] repository on GitHub, while `#bat` indicates that we're building the `bat` output from the Nixpkgs flake.
+
+When the build is done, run `ls .` and you should see something called `result` in the current directory. `result` is actually a [symlink] to the built package in the [Nix store][store], which you can verify:
+
+```shell title="Display the Nix store path for the build result"
+readlink result
+```
+
+You should see a path like this (it's likely to be a bit different on your machine):
+
+<NixStorePath pkg="bat-0.22.1" />
+
+What's happened here is that the Nix CLI has:
+
+- Downloaded the Nix code in [Nixpkgs]
+- Found a package definition with the name `bat` (code [here][nixpkgs-bat])
+- Used the build instructions for `bat` to build the [package][packages]
+- Stored the result in the [Nix store][store] using Nix's hash-based path system
+  {/* TODO: add substitution here and link to future caching doc */}
+
+You can now run bat:
+
+```shell title="Run bat from the local build result"
+./result/bin/bat --help
+```
+
+:rocket: **Success**!
+You've built and run a package using Nix.
+
+### Build a package for tools written in `$LANGUAGE` \{#language-specific}
+
+One of the great things about Nix is that package builds are extremely flexible, which enables you to create packages for things written in just about any programming language. In this section, we'll explore that by building and running packages for tools written in a variety of languages. Select one below to see some examples:
+
+<Languages />
+
+<SpecificLanguage lang="C++">
+Let's build and run [CMake]:
+
+```shell title="Build and then run CMake"
+nix build "nixpkgs#cmake"
+./result/bin/cmake --help
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+Let's build and run [Pandoc]:
+
+```shell title="Build and then run Pandoc"
+nix build "nixpkgs#pandoc"
+./result/bin/pandoc --version
+```
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+Let's build and run [npm]:
+
+```shell title="Build and then run npm"
+nix build "nixpkgs#nodePackages.npm"
+./result/bin/npm --help
+```
+
+If you run `ls result/bin` you'll notice that the package also includes [npx].
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+Let's build and run [pip]:
+
+```shell title="Build and then run pip"
+nix build "nixpkgs#python3Packages.pip"
+./result/bin/pip --help
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+Let's build and run [kubectl]:
+
+```shell title="Build and then run kubectl"
+nix build "nixpkgs#kubectl"
+./result/bin/kubectl --help
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+Let's build and run [ripgrep]:
+
+```shell title="Build and then run ripgrep"
+nix build "nixpkgs#ripgrep"
+./result/bin/rg --help
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+Let's build and run [scalafmt]:
+
+```shell title="Build and then run scalafmt"
+nix build "nixpkgs#scalafmt"
+./result/bin/scalafmt --version
+```
+</SpecificLanguage>
+
+### Beyond Nixpkgs
+
+While [Nixpkgs] is by far the largest Nix package repository in the known universe, any [Nix flake][flake] can include package [outputs]. Let's build a package from a different repo, this time the package for [Home Manager][hm], a popular Nix tool for configuring home environments:
+
+```shell title="Build Home Manager"
+nix build "https://flakehub.com/f/nix-community/home-manager/*"
+```
+
+Here, `https://flakehub.com/f/nix-community/home-manager/*` is a flake reference to the [nix-community/home-manager][hm] repo on FlakeHub.
+To run Home Manager:
+
+```shell title="Run Home Manager from the build result"
+./result/bin/home-manager --help
+```
+
+Upstreaming your packages to Nixpkgs is always an option, but it's good to bear in mind that with Nix you can distribute packages via any public Git repository with a [`flake.nix`][flake].
+
+## Build a package in a local flake \{#flake}
+
+[Earlier](#nixpkgs) in this guide, we built a Nix package defined in [Nixpkgs] to get a sense of some of the mechanics of that process.
+In this guide, we'll dig a bit deeper and build a Nix package defined in a local [Nix flake][flake].
+
+As above, select a preferred language:
+
+<Languages />
+
+To get started in your <Language /> project, create an empty directory and initialize a [flake template][templates]:
+
+<SpecificLanguage lang="C++">
+```shell title="Initialize a flake template for C++"
+mkdir nix-cpp-pkg && cd nix-cpp-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#cpp-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+```shell title="Initialize a flake template for Haskell"
+mkdir nix-haskell-pkg && cd nix-haskell-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#haskell-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+```shell title="Initialize a flake template for JavaScript"
+mkdir nix-javascript-pkg && cd nix-javascript-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#javascript-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+```shell title="Initialize a flake template for Python"
+mkdir nix-python-pkg && cd nix-python-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#python-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+```shell title="Initialize a flake template for Go"
+mkdir nix-go-pkg && cd nix-go-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#go-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+```shell title="Initialize a flake template for Rust"
+mkdir nix-rust-pkg && cd nix-rust-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#rust-pkg"
+```
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+```shell title="Initialize a flake template for Scala"
+mkdir nix-scala-pkg && cd nix-scala-pkg
+nix flake init --template "github:DeterminateSystems/zero-to-nix#scala-pkg"
+```
+</SpecificLanguage>
+
+Whichever language you've selected, you can build the [Nix package][packages] defined in the local flake by running:
+
+```shell title="Build a Nix package in the local flake"
+nix build
+```
+
+This command determines that the local flake has a [package output][outputs] that defines how the package is built.
+In this particular flake there's a `default` package, which enables us to run `nix build` without specifying an output, but if the package were output as `packages.mypkg`, for example, we'd need to run `nix build .#mypkg` to build it.
+
+<SpecificLanguage lang="C++">
+Here's the package definition that builds our C++ package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default =
+      let
+        binName = "zero-to-nix-cpp";
+        cppDependencies = with pkgs; [ boost gcc poco ];
+      in
+      pkgs.stdenv.mkDerivation {
+        name = "zero-to-nix-cpp";
+        src = self;
+        buildInputs = cppDependencies;
+        buildPhase = "c++ -std=c++17 -o ${binName} ${./main.cpp} -lPocoFoundation -lboost_system";
+        installPhase = ''
+          mkdir -p "$out/share"
+          cp -R dist/. "$out/share"/
+        '';
+      };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-cpp] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the `mkDerivation` function provided by Nix's [standard environment][stdenv].
+
+The package that results when you run `nix build` is a CLI tool that outputs a message.
+To run that tool:
+
+```shell title="Run the compiled binary"
+./result/bin/zero-to-nix-cpp
+```
+
+You should see this output:
+
+```shell title="Expected output"
+Hello from Nix + C++!
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Haskell">
+Here's the package definition that builds our Haskell package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default = pkgs.haskellPackages.mkDerivation {
+      pname = "zero-to-nix-haskell";
+      version = "0.1.0";
+      src = self;
+      license = pkgs.lib.licenses.cc-by-sa-40;
+      executableHaskellDepends = with pkgs.haskellPackages; [
+        base
+      ];
+    };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-haskell] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the [`haskellPackages.developPackage`][haskell-pkg-func] function provided by [Nixpkgs].
+
+The package that results when you run `nix build` is a CLI tool that outputs a message.
+To run that tool:
+
+```shell title="Run the compiled binary"
+./result/bin/zero-to-nix-haskell
+```
+
+You should see this output:
+
+```shell title="Expected output"
+Hello from inside a Haskell program built with Nix!
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="JavaScript">
+Here's the package definition that builds our JavaScript package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default = pkgs.buildNpmPackage {
+      name = "zero-to-nix-javascript";
+
+      buildInputs = with pkgs; [
+        nodejs_latest
+      ];
+
+      src = self;
+
+      npmDeps = pkgs.importNpmLock {
+        npmRoot = ./.;
+      };
+
+      npmConfigHook = pkgs.importNpmLock.npmConfigHook;
+
+      installPhase = ''
+        mkdir $out
+        cp dist/index.html $out
+      '';
+    };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-js] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the `buildNpmPackage` function, which is a wrapper around Nix's built-in derivation function.
+
+The package that results when you run `nix build` is a website built using the [Vite] framework.
+To view that website, open the HTML file at `result/share/index.html`.
+
+</SpecificLanguage>
+<SpecificLanguage lang="Python">
+Here's the package definition that enables us to build our Python package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default =
+      let
+        python = pkgs.python3;
+      in
+      python.pkgs.buildPythonApplication {
+        name = "zero-to-nix-python";
+
+        buildInputs = with python.pkgs; [ pip ];
+
+        src = ./.;
+      };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-py] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the [`buildPythonApplication`][buildpythonapplication] function, which is a wrapper around Nix's built-in `derivation` function.
+
+The resulting package is an executable that prints to the terminal.
+To run the package:
+
+```shell title="Run the built executable"
+./result/bin/zero-to-nix-python
+```
+
+You should see this terminal output:
+
+```text
+Hello from inside a Python program built with Nix!
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Go">
+Here's the package definition that enables us to build this Go package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default = pkgs.buildGoModule {
+      name = "zero-to-nix-go";
+      src = self;
+      vendorHash = "sha256-Ay1/QqbO2MyYgqJZKxrt1FZzLSgXbhSK3ceFPUlFujw=";
+      goSum = ./go.sum;
+      subPackages = [ "cmd/zero-to-nix-go" ];
+    };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-go] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the [`buildGoModule`][buildgomodule] function, which is a wrapper around Nix's built-in `derivation` function.
+
+The package that results when you run `nix build` is a web server built using the [Gin] framework.
+To run the package:
+
+```shell title="Run the compiled binary"
+./result/bin/zero-to-nix-go
+```
+
+In another window, run `curl http://localhost:8080` to receive a message from the server.
+
+</SpecificLanguage>
+<SpecificLanguage lang="Rust">
+Here's the package definition that enables us to build this Rust package:
+
+```nix title="flake.nix"
+{
+  packages = forAllSystems ({ pkgs }: {
+    default =
+      let
+        rustPlatform = pkgs.makeRustPlatform {
+          cargo = pkgs.rustToolchain;
+          rustc = pkgs.rustToolchain;
+        };
+      in
+      rustPlatform.buildRustPackage {
+        name = "zero-to-nix-rust";
+        src = ./.;
+        cargoLock = {
+          lockFile = ./Cargo.lock;
+        };
+      };
+  });
+}
+```
+
+For the full flake, see [`flake.nix`][flake-rs] on GitHub or run `cat flake.nix`.
+What you see here is a [derivation] that defines how to build the package, more specifically the [`buildRustPackage`][buildrustpackage] function, which is a wrapper around Nix's built-in `derivation` function.
+
+To run the resulting package, which is an executable that prints to the terminal:
+
+```shell title="Run the compiled binary"
+./result/bin/zero-to-nix-rust
+```
+
+You should see this terminal output:
+
+```text
+Hello from Nix + Rust!
+```
+
+</SpecificLanguage>
+<SpecificLanguage lang="Scala">
+We're not gonna lie to you: packaging [Scala] is pretty tricky.
+Fortunately, there's a third-party project called [`sbt-derivation`][sbt-derivation] that provides some nice helpers, including a handy function called `mkSbtDerivation`, which is a wrapper around Nix's built-in `derivation` function.
+
+For the full flake behind this package, see [`flake.nix`][flake-scala] on GitHub or run `cat flake.nix`.
+To run the resulting package, which is an executable that prints to the terminal:
+
+```shell title="Run the built executable"
+./result/bin/zero-to-nix-scala
+```
+
+You should see this terminal output:
+
+```text
+Hello from Nix + Scala!
+```
+</SpecificLanguage>
+
+We won't delve too much deeper into [derivations][derivation] and creating your own packages here, but we hope that this guide shows you how Nix code gets turned into real build output.
+
+[bat]: https://github.com/sharkdp/bat
+[buildgomodule]: https://nixos.org/manual/nixpkgs/stable/#ssec-language-go
+[buildpythonapplication]: https://nixos.org/manual/nixpkgs/stable/#buildpythonapplication-function
+[buildrustpackage]: https://nixos.org/manual/nixpkgs/stable/#rust
+[cat]: https://en.wikipedia.org/wiki/Cat_(Unix)
+[cmake]: https://cmake.org
+[derivation]: /concepts/derivations
+[flake]: /concepts/flakes
+[flake-cpp]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/cpp/flake.nix
+[flake-go]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/golang/flake.nix
+[flake-haskell]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/haskell/flake.nix
+[flake-js]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/javascript/flake.nix
+[flake-py]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/python/flake.nix
+[flake-rs]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/rust/flake.nix
+[flake-scala]: https://github.com/DeterminateSystems/zero-to-nix/tree/main/nix/templates/pkg/scala/flake.nix
+[gin]: https://github.com/gin-gonic/gin
+[haskell-pkg-func]: https://haskell4nix.readthedocs.io
+[hm]: https://github.com/nix-community/home-manager
+[install]: /start/install
+[kubectl]: https://github.com/kubernetes/kubectl
+[nix]: /concepts/nix
+[nixpkgs]: /concepts/nixpkgs
+[nixpkgs-bat]: https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ba/bat/package.nix
+[nixpkgs-repo]: https://github.com/NixOS/nixpkgs
+[npm]: https://npmjs.com
+[npx]: https://docs.npmjs.com/cli/v8/commands/npx
+[outputs]: /concepts/flakes#outputs
+[packages]: /concepts/packages
+[pandoc]: https://pandoc.org
+[pkg]: /concepts/package-management
+[pip]: https://pypi.org/project/pip
+[ref]: /concepts/flakes#references
+[ripgrep]: https://github.com/BurntSushi/ripgrep
+[rust]: https://rust-lang.org
+[sbt-derivation]: https://github.com/zaninime/sbt-derivation
+[scala]: https://scala-lang.org
+[scalafmt]: https://scalameta.org/scalafmt
+[start]: /start
+[stdenv]: https://nixos.org/manual/nixpkgs/stable/#chap-stdenv
+[store]: /concepts/nix-store
+[symlink]: https://en.wikipedia.org/wiki/Symbolic_link
+[templates]: /concepts/flakes#templates
+
+---
+
+**Search for Nix packages**
+
+Published: 
+URL: https://zero-to-nix.com//start/nix-search
+
+One great thing about Nix is that there are *tons* of [packages] available in the [Nix ecosystem][ecosystem] that you can use in [Nix development environments][env], in your [NixOS][nixos] installations, and more.
+While [Nixpkgs] is by far the largest Nix package collection&mdash;over 100,000 packages and counting :sunglasses:&mdash;any [Nix flake][flakes] can provide package [outputs].
+
+But navigating all of this plenty can be tricky, so in this guide we'll learn how to search for packages in Nixpkgs using the [`nix search`][nix-search] command and using the web application at [search.nixos.org][search].
+Then we'll learn how to explore packages in [other flakes](#nix-flake-show).
+
+## The `nix search` command \{#nix-search-command}
+
+The [Nix CLI][nix] has a `search` command that you can use to search the packages in a flake based on a search term.
+Let's start by searching [Nixpkgs], which is where we're mostly likely to find packages we want.
+This command will tell us if [cargo] is available in [Nixpkgs]:
+
+```shell title="Search Nixpkgs using cargo as the search term"
+nix search "https://flakehub.com/f/NixOS/nixpkgs/*" cargo
+```
+
+In this command, the `nixpkgs` [flake reference][flake-ref] is shorthand for `github:NixOS/nixpkgs`.
+
+<Admonition warning title="This could take a while" id="nix-search">
+  The first time you run `nix search`, the Nix CLI needs to download the full
+  Nix code contents of [Nixpkgs]&mdash;or whichever flake you're
+  searching&mdash;and then cache it. Future `nix search` runs for Nixpkgs should
+  be much speedier. Furthermore, Nixpkgs is the largest flake in existence and
+  running `nix search` on other flakes should be much faster in general.
+</Admonition>
+
+This brings up many results of the form `legacyPackages.{system}.{package}`, the first of which should look like this on an Apple Silicon (`aarch64-darwin`) system:
+
+```shell title="Example search result"
+* legacyPackages.aarch64-darwin.cargo (1.65.0)
+  Downloads your Rust project's dependencies and builds your project
+```
+
+The system attribute [varies](#system-specificity) on other platforms (you may see `x86_64-linux` or something else).
+After that first result, you should see many others, including packages like [`cargo-about`][cargo-about] and [`cargo-audit`][cargo-audit].
+
+<Admonition
+  warning
+  title="`legacyPackages` isn't legacy software"
+  id="legacy-packages"
+>
+  The `legacyPackages` attribute that you see in the search output is a bit
+  misleading. The [packages] prefaced with that aren't "legacy" packages;
+  instead, [Nixpkgs] uses a special `legacyPackages` attribute to output
+  packages instead of the usual `packages` output for reasons laid out
+  [here][legacy-comment].
+</Admonition>
+
+You can also output search results as JSON using the `--json` flag:
+
+```shell title="Output search results as JSON"
+nix search --json nixpkgs cargo
+```
+
+This can be useful if you want to parse the output using a tool like [jq].
+
+## search.nixos.org \{#web}
+
+The web interface at [search.nixos.org][search] has a few advantages over the [`nix search`](#nix-search-command) command:
+
+- It enables you to select a release channel for [Nixpkgs], such as [25.05] and [unstable]
+- It enables you to search across a range of [public flakes][public-flakes] beyond Nixpkgs (those flakes are listed [here][flakes-list])
+
+## Exploring a flake with the `nix flake show` command \{#nix-flake-show}
+
+As an example, let's explore a popular flake for the [Wayland] window system protocol.
+
+```shell title="Display the flake outputs for the nixpkgs-wayland flake"
+nix flake show "github:nix-community/nixpkgs-wayland"
+```
+
+You can also display the outputs as JSON:
+
+```shell title="Display the flake outputs for the nixpkgs-wayland flake as JSON"
+nix flake show --json "github:nix-community/nixpkgs-wayland"
+```
+
+<Admonition warning title="This could take a while" id="nix-search">
+  The first time you run `nix flake show`, the Nix CLI needs to download the
+  full contents of [`nixpkgs-wayland`][nixpkgs-wayland]&mdash;or whichever flake
+  you're running `nix flake show` on&mdash;and then cache it. Future `nix flake
+  show` runs for the same [flake reference][flake-ref] should be much speedier.
+</Admonition>
+
+<Admonition
+  info
+  title="When to use `nix search` vs. `nix flake show`"
+  id="which-search-command"
+>
+  Should you use `nix flake show` or `nix search`? A good rule of thumb is to
+  always use `nix search` with Nixpkgs and to initially use `nix flake show`
+  with other flakes. If the package outputs for `nix flake show` are big enough
+  to be tricky to navigate, use `nix search` for that flake instead.
+</Admonition>
+
+## System specificity
+
+One thing you'll notice about the search output for `nix search`, [search.nixos.org][search], and `nix flake show` is that all the packages listed in the query results are for your current system (`x86_64-linux` for an AMD/Intel Linux system, `aarch64-darwin` for an Apple Silicon system, and so on).
+That's because Nix works in a fundamentally [system-specific] way.
+The `cargo` package on a Linux machine is considered a _different package_ from `cargo` on a non-Linux system.
+
+[25.05]: https://github.com/nixOS/nixpkgs/tree/25.05
+[cargo]: https://github.com/rust-lang/cargo
+[cargo-about]: https://github.com/EmbarkStudios/cargo-about
+[cargo-audit]: https://github.com/RustSec/rustsec/tree/main/cargo-audit
+[cargo-edit]: https://github.com/killercup/cargo-edit
+[ecosystem]: /concepts/ecosystem
+[env]: /concepts/dev-env
+[flake-ref]: /concepts/flakes#references
+[flakes]: /concepts/flakes
+[flakes-list]: https://github.com/NixOS/nixos-search/blob/main/flakes/manual.toml
+[jq]: https://stedolan.github.io/jq
+[legacy-comment]: https://github.com/NixOS/nixpkgs/blob/fcc8ff7cc271c9652623dae2a9fcd1ba49232b57/flake.nix#L47-L55
+[nix]: /concepts/nix
+[nix-search]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-search
+[nixos]: /concepts/nixos
+[nixpkgs]: /concepts/nixpkgs
+[nixpkgs-wayland]: https://github.com/nix-community/nixpkgs-wayland
+[outputs]: /concepts/flakes#outputs
+[packages]: /concepts/packages
+[pkg]: /concepts/package-management
+[public-flakes]: https://search.nixos.org/flakes
+[search]: https://search.nixos.org
+[system-specific]: /concepts/system-specificity
+[unstable]: https://github.com/nixOS/nixpkgs/tree/nixpkgs-unstable
+[wayland]: https://wayland.freedesktop.org
+
+---
+
+**Turn your project into a flake**
+
+Published: 
+URL: https://zero-to-nix.com//start/init-flake
+
+In some of the previous steps in Zero to Nix you learned about [Nix flakes][flakes] and Nix [development environments][dev-env].
+Turning your own projects into flakes can be somewhat tricky, so we at [Determinate Systems][detsys] have created a tool that can help in many scenarios: [`fh`][fh], the CLI for the [FlakeHub] platform.
+`fh` has a utility called [`fh init`][fh-init] that creates a `flake.nix` file based on two things:
+
+1. The contents of your project
+1. Your responses to its interactive questions
+
+You can run `fh init` using Nix:
+
+```shell title="Initialize your flake"
+nix run "https://flakehub.com/f/DeterminateSystems/fh/*" -- init
+```
+
+This will start up an interactive builder that asks you a series of questions and then writes a `flake.nix` file into the root of your project (plus some other files if you say yes to some of those questions).
+Once you've generated a new flake, you can see which outputs it has:
+
+```shell title="Display the flake's outputs"
+nix flake show
+```
+
+You should see something like this:
+
+```text title="Flake outputs"
+git+file:///path/to/fh-init-example-project
+├───devShells
+│   ├───aarch64-darwin
+│   │   └───default: development environment 'nix-shell'
+│   ├───aarch64-linux
+│   │   └───default omitted (use '--all-systems' to show)
+│   ├───x86_64-darwin
+│   │   └───default omitted (use '--all-systems' to show)
+│   └───x86_64-linux
+│       └───default omitted (use '--all-systems' to show)
+└───schemas: unknown
+```
+
+`fh init` supports a wide variety of [languages and tools][handlers].
+If your project has a [`Cargo.toml`][cargo-toml] file in the root, for example, then `fh init` infers that it's a [Rust] project and asks if you want to add Rust dependencies to your Nix [development environment][dev-env].
+If you say yes, then the generated `flake.nix` will include the `cargo` build tool plus some other Rust-specific tools.
+Note that `fh init` currently only supports [`devShells`][dev-env] outputs.
+That is, it only generates a development environment for you, not things like [package outputs][packages].
+
+<Admonition
+  warning
+  title="The limitations of `fh init`"
+  id="fh-init-limitations"
+>
+  Be aware that `fh init` operates on a "best-guess" basis to infer which
+  languages and tools you use in your project. It's possible that it will miss
+  things or make incorrect guesses. But we hope that the `flake.nix` that it
+  creates for you will at least serve as a solid initial template that you can
+  modify further.
+</Admonition>
+
+## Example project
+
+We've created an example project that you can use to test out `fh init`:
+
+```shell title="Test out fh init using the example project"
+git clone https://github.com/DeterminateSystems/fh-init-example-project
+cd fh-init-example-project
+nix run "https://flakehub.com/f/DeterminateSystems/fh/*" -- init
+
+# respond to the prompts
+
+nix flake show
+```
+
+[cargo-toml]: https://doc.rust-lang.org/cargo/reference/manifest.html
+[detsys]: https://determinate.systems
+[dev-env]: /concepts/dev-env
+[fh]: https://github.com/DeterminateSystems/fh
+[fh-init]: https://github.com/determinateSystems/fh#initialize-a-new-flakenix-from-scratch
+[flakehub]: /concepts/flakehub
+[flakes]: /concepts/flakes
+[handlers]: https://github.com/DeterminateSystems/fh/tree/main/src/cli/cmd/init/handlers
+[packages]: /concepts/packages
+[rust]: https://rust-lang.org
+
+---
+
+**Uninstall Nix (if necessary)**
+
+Published: 
+URL: https://zero-to-nix.com//start/uninstall
+
+At the beginning of the Zero to Nix quick start, we [installed] Nix using the fast and stable [Determinate Nix Installer][nix-installer], from [Determinate Systems][ds].
+We hope that your journey with Nix continues well into the future, but if you need to uninstall Nix for any reason you can do so with this command:
+
+```shell title="Uninstall Nix"
+/nix/nix-installer uninstall
+```
+
+Follow the prompts to approve the requested changes.
+Some of the changes that the installer requests:
+
+- Delete the directory tree under `/nix`
+- Delete the [Nix] CLI tool
+- Delete all Nix-specific users and groups
+- Delete the Nix configuration file at `/etc/nix/nix.conf`
+
+Once the Determinate Nix Installer is done, you can verify that uninstallation has succeeded by confirming that directories like `/nix` and `~/.nix-profile` have been removed from your system:
+
+```shell title="Verify that uninstallation has succeeded"
+ls /nix # error
+ls ~/.nix-profile # error
+```
+
+[ds]: https://determinate.systems
+[installed]: /start/install
+[nix]: /concepts/nix
+[nix-installer]: /concepts/nix-installer
+
+---
+
+**Learn more**
+
+Published: 
+URL: https://zero-to-nix.com//start/learn-more
+
+This completes your Zero to Nix journey!
+You just accomplished a great deal:
+
+- You [installed Nix][install] on your machine
+- You ran some [programs] using Nix
+- You explored some [Nix development environments][env]
+- You [searched] for packages in [Nixpkgs] and elsewhere in the Nix [ecosystem]
+- You built some [Nix packages][pkg]
+
+And that's just to name a few.
+We're thrilled that you've taken the time and made the effort.
+But we hope that your Nix journey continues onward.
+This guide suggests some areas beyond the scope of the quick start where you can apply your newly won Nix knowledge.
+
+## Build container images \{#containers}
+
+[Nix] can build [packages] for many things, from standard tools like [curl] and [Git] to [Vim] plugins to [Visual Studio Code][code] extensions to web services that you write in your preferred language and far beyond.
+We've covered a few of these package types here in the [quick start][start].
+Another powerful Nix feature is that you can use it to build [OCI]-compliant container images and thereby replace tools like [Docker] and [Podman] (at least when it comes to building images).
+
+<ExternalSources
+  showTitle={false}
+  links={[
+    {
+      title: "Nix Docker examples",
+      href: "https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/examples.nix",
+      source: {
+        title: "Nixpkgs",
+        href: "https://github.com/NixOS/nixpkgs",
+      },
+    },
+    {
+      title: "Building and running Docker images",
+      href: "https://nix.dev/tutorials/nixos/building-and-running-docker-images",
+      source: {
+        title: "nix.dev",
+        href: "https://nix.dev",
+      },
+    },
+    {
+      title: "The `dockerTools` build functions",
+      href: "https://nixos.org/manual/nixpkgs/stable/#sec-pkgs-dockerTools",
+      source: {
+        title: "The Nixpkgs manual",
+        href: "https://nixos.org/manual/nixpkgs/stable",
+      },
+    },
+  ]}
+/>
+
+## Use NixOS as your operating system \{#nixos}
+
+[NixOS] is a [Linux] distribution built on Nix and its core principles, such as [reproducibility] and [declarative configuration][declarative].
+
+<ExternalSources
+  showTitle={false}
+  links={[
+    {
+      title: "NixOS: How it works and how to install it",
+      href: "https://youtube.com/watch?v=oPymb2-IXbg",
+      source: {
+        title: "DorianDotSlash on YouTube",
+        href: "https://youtube.com/@Doriandotslash",
+      },
+    },
+    {
+      title: "NixOS is the power user distro",
+      href: "https://youtube.com/watch?v=ck4J2Faa7Fc",
+      source: {
+        title: "DistroTube on YouTube",
+        href: "https://youtube.com/@DistroTube",
+      },
+    },
+    {
+      title: "Deploying NixOS using Terraform",
+      href: "https://nix.dev/tutorials/deploying-nixos-using-terraform#deploying-nixos-using-terraform",
+      source: {
+        title: "nix.dev",
+        href: "https://nix.dev",
+      },
+    },
+  ]}
+/>
+
+## Configure your home environment \{#home-environment}
+
+[Home Manager][home] is a plugin-based tool built on Nix that you can use to configure a wide range of tools in your home environment, including [Vim], [tmux], [Visual Studio Code][code], [Git], [gpg], and shells like [Bash], [zsh], and [fish].
+
+<ExternalSources
+  showTitle={false}
+  links={[
+    {
+      title: "From nix-env to Home Manager",
+      href: "https://youtube.com/watch?v=PmD8Qe8z2sY",
+      source: {
+        title: "Burke Libbey's YouTube channel",
+        href: "https://youtube.com/@burkelibbey6583",
+      },
+    },
+    {
+      title: "Declarative management of dotfiles with Nix and Home Manager",
+      href: "https://bekk.christmas/post/2021/16/dotfiles-with-nix-and-home-manager",
+      source: {
+        title: "Bekk Christmas' blog",
+        href: "https://bekk.christmas",
+      },
+    },
+    {
+      title: "Home Manager configuration options",
+      href: "https://nix-community.github.io/home-manager/options.xhtml",
+      source: {
+        title: "The Home Manager manual",
+        href: "https://nix-community.github.io/home-manager",
+      },
+    },
+  ]}
+/>
+
+## Continuous integration \{#ci}
+
+You learned about [Nix development environments][env] earlier in the quick start.
+Because Nix development environments are both cross platform and fully [reproducible][reproducibility], they're quite useful in [continuous integration][ci] environments.
+
+<ExternalSources
+  showTitle={false}
+  links={[
+    {
+      title: "Continuous Integration with GitHub Actions",
+      href: "https://nix.dev/tutorials/continuous-integration-github-actions",
+      source: {
+        title: "nix.dev",
+        href: "https://nix.dev",
+      },
+    },
+    {
+      title: "Streamline your GitHub Actions dependencies using Nix",
+      href: "https://determinate.systems/posts/nix-github-actions",
+      source: {
+        title: "The Determinate Systems blog",
+        href: "https://determinate.systems/posts",
+      },
+    },
+    {
+      title:
+        "Setting up Buildkite for Nix-based projects using Terraform and GCP",
+      href: "https://tweag.io/blog/2020-07-08-buildkite-for-nix-ci",
+      source: {
+        title: "The Tweag blog",
+        href: "https://tweag.io/blog",
+      },
+    },
+  ]}
+/>
+
+[bash]: https://gnu.org/software/bash
+[ci]: https://en.wikipedia.org/wiki/Continuous_integration
+[code]: https://code.visualstudio.com
+[curl]: https://curl.se
+[declarative]: /concepts/declarative
+[docker]: https://docker.com
+[ecosystem]: /concepts/ecosystem
+[env]: /start/nix-develop
+[fish]: https://fishshell.com
+[git]: https://git-scm.com
+[gpg]: https://gnupg.org
+[home]: https://github.com/nix-community/home-manager
+[install]: /start/install
+[linux]: https://www.kernel.org/
+[nix]: /concepts/nix
+[nixos]: /concepts/nixos
+[nixpkgs]: /concepts/nixpkgs
+[oci]: https://opencontainers.org
+[packages]: /concepts/packages
+[pkg]: /start/nix-build
+[programs]: /start/nix-run
+[podman]: https://podman.io
+[reproducibility]: /concepts/reproducibility
+[searched]: /start/nix-search
+[start]: /start
+[tmux]: https://github.com/tmux/tmux
+[vim]: https://www.vim.org
+[zsh]: https://zsh.org
+
+---
+
+## Concept pages
+
+---
+
+**Closures**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/closures
+
+In Nix, a [package]'s _closure_ encapsulates all of the packages required to [build or run](#build-vs-run) it (as well as the packages required to build those packages, and so on).
+A package can have zero packages in its closure, because no other packages are required to build it, or it can have many.
+Whenever you build a package, Nix always [realises] its entire closure in a [sandboxed] environment.
+
+## Build-time and runtime closures \{#build-vs-run}
+
+Nix closures come in two different types:
+
+- _Build-time_ closures include everything necessary to build the package.
+- _Runtime_ closures include everything necessary to run the package.
+
+To give an example, let's say that you're using Nix to build [Firefox] because you want to install and run it on your machine.
+The build-time closure for Firefox would include [GCC] because you can't build Firefox without it.
+The runtime closure, however, would not include GCC&mdash;Firefox has already been built!&mdash;but it would include [GTK], which Firefox needs for its user interface.
+
+When you see mentions of Nix closures in Nix documentation and other places, runtime closures are usually what's meant.
+
+## Closure bloat
+
+If you include things that a package doesn't need in its closure, you end up with a waste of resources&mdash;time, disk space, and network bandwidth&mdash;known as _closure bloat_.
+Nix always [realises] whatever you tell it to and doesn't have any built-in mechanisms to prevent closure bloat.
+The solution to closure bloat is vigilance&mdash;you should always vet the [derivations] you create to ensure that every package you include in a derivation is truly required to build or run the desired package.
+
+[derivations]: /concepts/derivations
+[firefox]: https://mozilla.org/firefox
+[gcc]: https://gcc.gnu.org
+[gtk]: https://gtk.org
+[package]: /concepts/packages
+[realises]: /concepts/realisation
+[sandboxed]: /concepts/sandboxing
+
+---
+
+**Declarative programming**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/declarative
+
+In _declarative programming_ a user instructs the computer _what_ to do, not _how_ to do it.
+
+The result of this is that often a final system is described as it _should exist_.
+A management program (in this case Nix) can then construct a path towards the final output
+and do the necessary steps in the required order, without a user having to worry about what exactly is happening and when.
+
+Nix follows declarative principles in the way that package definitions (or [derivations](/concepts/derivations)) are constructed with some minor exceptions.
+
+Under the hood, some parts of packages still have to be written imperatively, but by wrapping these parts in declarative layers,
+users of the upper layers don't have to be aware of what is happening below the surface.
+
+Essentially: one user can solve a problem _once_,
+and many people can then benefit from that solution without needing to know how exactly it works (unless they want to).
+
+---
+
+**Caching**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/caching
+
+By default, Nix uses _caching_ to make [building packages][packages] faster and more efficient.
+This in turn makes other Nix operations that involve building packages, like creating [development environments][dev] and standing up [NixOS] environments, faster and more efficient as well.
+
+## Building vs. caching
+
+Whenever Nix builds a [package][packages] by [realising] the package's [derivation], it needs to realise the entire [closure] of the derivation, which means that it needs to realise all of the derivations required to build the package's derivation, plus the derivations required to build those derivations, and so on.
+Some packages have tiny closures (dependency trees) while others have massive closures involving thousands of derivations, which makes build efficiency a primary concern in Nix.
+
+Here's what Nix does whenever it realises a derivation:
+
+1. It computes a hash for the derivation and, using that hash, a [Nix store path][store-paths] of this form (for a hypothetical Git package):
+
+   <NixStorePath pkg="git-2.37.0" hash="f8f72p3xxr20k111mpg4kk93i4cp74qb" />
+
+1. With a store path in hand, Nix determines whether the derivation has already been built.
+   First, Nix checks the configured [Nix store][store] to see if the path `/nix/store/f8f72p3xxr20k111mpg4kk93i4cp74qb/git-2.37.0` already exists.
+   If so, it uses that rather than building it.
+   If not...
+
+1. It checks if the store path exists in a configured [binary cache](#binary-caches).
+
+1. If the store path exists neither in a configured [Nix store][store] nor in a configured [binary cache](#binary-caches), Nix builds the derivation from scratch, recursively following all of the steps in this list, using already-realised packages whenever possible and building only what is necessary.
+
+<Admonition success title="Nix without caching">
+  Without caching, [realisation][realising] would involve always building
+  everything from scratch every single time, which would make Nix a much less
+  efficient&mdash;and thereby much less compelling!&mdash;package manager and
+  build tool.
+</Admonition>
+
+## Binary caches
+
+In addition to the local [Nix store][store], you can also cache Nix artifacts using remote Nix stores called _binary caches_ that serve pre-built binaries via HTTP.
+For the most part, binary caches work just like the Nix store, enabling Nix to quickly determine whether something has already been built on the basis of a derivation's Nix store path.
+
+By default, Nix uses [cache.nixos.org][cache] as a binary cache, which is open to all and populated by continuous integration systems.
+In addition to this community cache, you can also [run your own][run] or use a third-party binary cache service like [Cachix].
+
+[binary-cache]: https://nixos.org/manual/nix/stable/package-management/binary-cache-substituter
+[cache]: http://cache.nixos.org
+[cachix]: https://www.cachix.org
+[closure]: /concepts/closures
+[derivation]: /concepts/derivations
+[dev]: /concepts/dev-env
+[nixos]: /concepts/nixos
+[packages]: /concepts/packages
+[realising]: /concepts/realisation
+[run]: https://wiki.nixos.org/wiki/Binary_Cache
+[store]: /concepts/nix-store
+[store-paths]: /concepts/nix-store#store-paths
+
+---
+
+**Channels**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/channels
+
+A _Nix channel_ is a mechanism used by the legacy Nix CLI to keep [Nixpkgs] up to date.
+In the new Nix CLI, channels have been replaced by [flakes].
+
+## How do channels work?
+
+A channel is a URL that points to some Nix code, such as `https://nixos.org/channels/nixos-unstable`.
+As a convenience, you can also use the URL syntax `channel:{name}`, which is expanded by Nix to `https://nixos.org/channels/{name}`.
+
+You can configure Nix to fetch a channel automatically:
+
+```shell title="Add a channel"
+nix-channel --add https://nixos.org/channels/nixos-unstable
+```
+
+You can then run this to have Nix fetch all channels that you've configured:
+
+```shell title="Update all channels"
+nix-channel --update
+```
+
+The Nix code in the channels is unpacked into `~/.nix-defexpr/channels` where it can be found by legacy CLI commands such as `nix-env`.
+
+You can find more information about channels in the [Nix manual][manual].
+
+## Examples of channels
+
+| Channel URL                    | Release date                                                               | Description                                                                                                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `channel:nixos-22.11`          | Initially released in November of 2022 and updated for 6 months afterwards | A stable version of NixOS, released in November of 2022. Security patches and updates will be backported, but no new applications, or breaking changes will be applied                                                             |
+| `channel:nixos-unstable`       | Frequently updated                                                         | A rolling release channel of NixOS, which is updated whenever a set of important packages builds on Hydra. Security updates, new packages, and new modules will frequently appear on your computer, and breaking changes may occur |
+| `channel:nixos-unstable-small` | Same as `nixos-unstable`, but even more frequently                         | A rolling release channel similar to `nixos-unstable` but with a smaller set of packages that are tested. This means this channel is updated more frequently, but may have some broken packages on it as well                      |
+
+## The problem with `nix-channel`
+
+The problem with channels is that they do not provide any guarantees about what inputs are actually used in a particular build.
+A channel URL such as `channel:nixos-22.11` can contain different Nix code at different points in time.
+As such source [pinning] and rollbacks are much harder with channels.
+
+This means that while Nix is [reproducible] in theory, in practise inputs to builds can frequently change, and a build may fail because of this.
+This can cause you to be unable to update your NixOS system, or build a package that previously could be built.
+
+**Because of this the use of Nix channels is highly discouraged!**
+
+[flakes]: /concepts/flakes
+[manual]: https://nixos.org/manual/nix/stable/command-ref/nix-channel
+[nixpkgs]: /concepts/nixpkgs
+[pinning]: /concepts/pinning
+[reproducible]: /concepts/reproducibility
+
+---
+
+**Derivations**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/derivations
+
+A _derivation_ is an instruction that Nix uses to [_realise_][realisation] a Nix package.
+They're created using a special `derivation` function in the [Nix language](#nix-language).
+They can depend on any number of other derivations and produce one or more final [outputs](#outputs).
+A derivation and all of the dependencies required to build it&mdash;direct dependencies, and all dependencies of those dependencies, etc&mdash;is called a [closure].
+
+## Derivation outputs \{#outputs}
+
+The most common outputs:
+
+- `out`, the most generic one
+- `lib`, for library outputs
+- `dev`, general development resources such as header files
+- `man`, for manual pages
+
+A derivation and all of the dependencies required to build it&mdash;direct dependencies, and all dependencies of those dependencies, etc&mdash;is called a _package closure_.
+
+<Admonition success title="Mental model">
+  You may find it helpful to think of a derivation as the *plan* or *blueprint*
+  for a Nix package.
+</Admonition>
+
+## Derivations in the Nix language \{#nix-language}
+
+In the [Nix language][lang], derivations are created using the [`derivation`][func] function.
+Here's the type signature for `derivation` expressed as a [Haskell]-ish signature:[^1]
+
+```haskell title="Derivation type signature" disableClipboard
+derivation ::
+    { system   : String
+    , name     : String
+    , builder  : Path | Derivation
+    , ?args    : [String]
+    , ?outputs : [String]
+    } -> Derivation
+```
+
+Here's an example derivation:
+
+```nix title="Example derivation"
+derivation {
+  # A name for the derivation (whatever you choose)
+  name = "hello-text";
+  # The system realising the derivation
+  system = "x86_64-linux";
+  # The program realising the derivation
+  builder = "bash";
+  # Arguments passed to the builder program
+  args = ["-c" "mkdir $out && echo Hello world > $out/hello.txt"]
+};
+```
+
+And that's it!
+The `derivation` function takes only these arguments.
+But derivations can be far less straightforward, because the scripting logic that you pass via `args` can be arbitrarily complex.
+
+### String interpolation
+
+If Nix sees this string...
+
+```nix title="my-file.nix"
+{
+  buildPhase = ''
+    mv ${pkgs.website}/favicon.ico
+  '';
+}
+```
+
+The string output of a derivation is always a [Nix store path][store]
+
+## Derivation outputs
+
+## Realisation
+
+### Special variables
+
+There are two special variables to be aware of when writing derivations:
+
+- `$out` represents the root of the directory structure for build output.
+- `$src` represents the build sources.
+
+## The standard environment \{#stdenv}
+
+Most derivations in the Nix ecosystem are based on the [`mkDerivation`][mk] function from the [standard environment][stdenv].
+
+While you _can_ create derivations using the raw `derivation` function, it's far more common to use a wrapper function around it.
+Perhaps the most commonly used wrapper function is [`stdenv.mkDerivation`][mk].
+Arguments:
+
+- The `name` of the package. If you specify `pname` and `version` instead, the `name` ends up `${pname}-${version}`.
+
+## Other derivation functions
+
+Outside of `stdenv.mkDerivation`, there are many custom derivation wrappers for specific languages, frameworks, and more (and many of those actually wrap `stdenv.mkDerivation`).
+Some examples:
+
+- [`buildGoModule`][buildgomodule] for [Go]
+- [`buildRustPackage`][buildrustpackage] for [Rust]
+- [`buildPythonApplication`][buildpythonapplication] for [Python]
+
+You're likely to encounter many more in the Nix ecosystem.
+And you're always free to create your own derivation functions and even wrap helper functions like `buildPythonApplication`.
+
+[^1]: Kudos to [Ian Henry][ian] for this idea.
+
+[buildgomodule]: https://nixos.org/manual/nixpkgs/stable/#sec-language-go
+[buildpythonapplication]: https://nixos.org/manual/nixpkgs/stable/#python
+[buildrustpackage]: https://nixos.org/manual/nixpkgs/stable/#rust
+[closure]: /concepts/closures
+[func]: /concepts/derivations
+[go]: https://go.dev
+[haskell]: https://www.haskell.org
+[ian]: https://ianthehenry.com/
+[lang]: /concepts/nix-language
+[mk]: https://nixos.org/manual/nixpkgs/stable/#sec-using-stdenv
+[nixpkgs]: /concepts/nixpkgs
+[packages]: /concepts/packages
+[python]: https://python.org
+[realisation]: /concepts/realisation
+[rust]: https://rust-lang.org
+[stdenv]: https://nixos.org/manual/nixpkgs/stable/#chap-stdenv
+[store]: /concepts/nix-store
+
+---
+
+**Development environments**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/dev-env
+
+A Nix _development environment_ is a [derivation] which builds a shell system environment.
+This environment is [hermetically] sealed off from the host,
+which means that no other dev environment can make changes or override tooling in it.
+
+This enables you to contain all development tooling (the environment [closure]) for a particular project in a dev shell,
+which is separated from even the dev shells for projects of a similar nature (same programming language, same set of dependencies, etc).
+
+[hermetically]: /concepts/hermeticity
+[closure]: /concepts/closures
+[derivation]: /concepts/derivations
+
+---
+
+**Ecosystem**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/ecosystem
+
+The _Nix ecosystem_ is a software ecosystem that has the [Nix] package manager and [language] at its core but also includes a vast network of related tools and systems built on top of Nix.
+On the official side, the Nix ecosystem includes [NixOS], [NixOps], [Hydra], [Home Manager][hm], and [other projects][others].
+On the unofficial side, the Nix ecosystem includes everything from [language] libraries and helpers to [package repositories][packages] to developer tools and far beyond.
+
+Depending on your perspective, Nix-inspired projects like [GNU Guix][guix] and projects that share Nix's commitment to principles like [reproducibility] and [declarative configuration][declarative] may also fall under the Nix ecosystem umbrella.
+
+Regardless of where you draw the lines, getting into Nix can bring vast regions of the software industry into your reach.
+
+[declarative]: /concepts/declarative
+[guix]: http://guix.gnu.org
+[hm]: https://github.com/nix-community/home-manager
+[hydra]: https://github.com/NixOS/hydra
+[language]: /concepts/nix-language
+[nix]: /concepts/nix
+[nixops]: https://github.com/NixOS/nixops
+[nixos]: /concepts/nixos
+[others]: https://github.com/nix-community
+[packages]: /concepts/packages
+[reproducibility]: /concepts/reproducibility
+
+---
+
+**FlakeHub**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/flakehub
+
+[FlakeHub] is a platform for discovering and publishing [Nix flakes][flakes] built by [Determinate Systems][detsys].
+It offers a wide variety of features that Nix on its own does not:
+
+- [Semantic versioning][semver] for flakes, including version modifiers like `~` (flexible patch) and `=` (exact match).
+- The ability to explore the Nix flake landscape in a variety of ways:
+  - Plaintext search
+  - [All flakes][all-flakes]
+  - [All organizations][all-orgs]
+  - Via labels such as [`nixos`][label-nixos] or [`rust`][label-rust]
+- Automated flake [publishing] with GitHub Actions, including a user-friendly [wizard] to help you construct an Actions configuration for your project.
+
+FlakeHub also offers a CLI tool called [`fh`][fh] that you can use to perform a variety of actions against the FlakeHub API.
+
+<Admonition info open title="FlakeHub is a proprietary platform">
+Although we at [Determinate Systems][detsys] believe that FlakeHub makes important aspects of using [Nix flakes][flakes] more straightforward&mdash;and fun!&mdash;it is a proprietary platform and mostly not open source.
+Most of FlakeHub's features are free, including [semantic versioning][semver] and publishing [public flakes][visibility]
+
+In other words, you can use [Nix] and [Nix flakes][flakes] without using FlakeHub just as you can use [Git] without using [GitHub].
+
+</Admonition>
+
+[all-flakes]: https://flakehub.com/flakes
+[all-orgs]: https://flakehub.com/orgs
+[detsys]: https://determinate.systems
+[docs]: https://flakehub.com/docs
+[fh]: https://github.com/DeterminateSystems/fh
+[flakehub]: https://flakehub.com
+[flakes]: /concepts/flakes
+[git]: https://git-scm.com
+[github]: https://github.com
+[label-nixos]: https://flakehub.com/label/nixos
+[label-rust]: https://flakehub.com/label/rust
+[nix]: /concepts/nix
+[publishing]: https://determinate.systems/posts/introducing-flakehub#publish
+[semver]: https://flakehub.com/docs/concepts/semver
+[visibility]: https://flakehub.com/docs/concepts/visibility
+[wizard]: https://flakehub.com/new
+
+---
+
+**Nix flakes**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/flakes
+
+<Admonition warning open title="Flakes are experimental but nonetheless strongly recommended" id="flakes-warning">
+Nix flakes are currently an **experimental feature** in Nix and there is currently no specific timeline for making flakes official.
+While the user interface around flakes is unlikely to change drastically while they remain experimental, there may be breaking changes along the way.
+
+[Channels] will continue be the "official" way of using Nix for the foreseeable future.
+We strongly recommend, however, that you learn to use flakes if you're already a Nix user or to begin your Nix journey with flakes rather than channels if you're just getting started with Nix.
+
+</Admonition>
+
+A Nix _flake_ is a directory with a `flake.nix` and [`flake.lock`](#lockfile) at the root that [outputs](#outputs) Nix expressions that others can use to do things like [build packages][packages], [run programs][run], use [development environments][env], or stand up [NixOS] systems.
+If necessary, flakes can use the outputs of other flakes as [inputs](#inputs).
+
+<Admonition success title="Mental model" id="flakes-mental-model" open>
+It may be helpful to think of flakes as processors of [Nix code][lang].
+They take Nix expressions as [input](#inputs) and [output](#outputs) things that Nix can use, like [package definitions][packages], [development environments][env], or [NixOS] configurations.
+
+Flakes thus form a kind of chain.
+Let's say that I create a flake that uses a helper function output by [Nixpkgs]&mdash;which is a flake!&mdash;to define a package build.
+My teammate could then use the package definition from my flake as part of a Nix development environment.
+Another team then could use that development environment in one of their projects.
+And so on.
+
+</Admonition>
+
+## Flake references \{#references}
+
+A _flake reference_ is a string representation of where the flake is located.
+Flake references are used in two places:
+
+1. In flake [input declarations](#inputs) to depend on outputs from the flake.
+1. In shell environments when running commands like `nix run github:DeterminateSystems/flake-checker` (which runs the [flake-checker] program).
+
+Here are some example flake references:
+
+Reference | Description
+:---------|:-----------
+`path:/home/nix-stuff/my-flake` | The `/home/nix-stuff/my-flake` directory on the current host
+`github:DeterminateSystems/zero-to-nix` | The [DeterminateSystems/zero-to-nix][gh-z2n] GitHub repository
+`github:DeterminateSystems/zero-to-nix/other` | The [`other`][other] branch of the [DeterminateSystems/zero-to-nix][gh-z2n] GitHub repository
+`github:DeterminateSystems/zero-to-nix/d51c83a5d206e882a6f15a282e32b7079f5b6d76` | Commit [`d51c83a5d206e882a6f15a282e32b7079f5b6d76`][hash] on the [DeterminateSystems/zero-to-nix][gh-z2n] GitHub repository
+`github:DeterminateSystems/zero-to-nix/pull/2/head` | Pull request 1 on the [DeterminateSystems/zero-to-nix][gh-z2n] GitHub repository
+`nixpkgs` | The most recent revision of the [`nixpkgs-unstable`][unstable] branch of [Nixpkgs] (an alias for `github:NixOS/nixpkgs`)
+`nixpkgs/release-22.11` | The [`release-22.11`][22-11] branch of Nixpkgs
+[`https://flakehub.com/f/NixOS/nixpkgs/0.2405.*`][fh-nixpkgs] | The most recent revision of the [`nixos-24.05`][branch] branch of [Nixpkgs] hosted on [FlakeHub]
+
+
+You can find a more systematic treatment of flake references in the [official documentation][refs-official].
+
+### References and revisions \{#revisions}
+
+Flake references are _always_ to a specific revision of the flake.
+[Nixpkgs], for example, is a flake but each revision of Nixpkgs&mdash;and there are many thousands&mdash;has a flake reference.
+
+## Flake inputs \{#inputs}
+
+_Flake inputs_ are Nix dependencies that a flake needs to be built.
+Each input in the set can be pulled from various sources, such as github, generic git repositories, and even your filesystem.
+
+Furthermore, inputs can modify each other's inputs to make sure that,
+for example, multiple dependencies all rely on the same version of nixpkgs.
+This is done via the `inputs.<input>.follows` attribute.
+
+```nix title="flake.nix"
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
+}
+```
+
+You can find a full breakdown of the flake input schema in the [Nix manual][manual].
+
+### The `flake.lock` file \{#lockfile}
+
+All flake inputs are [pinned][pinning] to specific [revisions](#revisions) in a lockfile called `flake.lock`.
+This file stores revision information as [JSON].
+
+The `flake.lock` file ensures that Nix flakes have purely deterministic outputs.
+A `flake.nix` file without an accompanying `flake.lock` should be considered incomplete and a kind of proto-flake.
+Any Nix CLI command that is run against the flake&mdash;like `nix build`, `nix develop`, or even `nix flake show`&mdash;generates a `flake.lock` for you.
+
+Here's an example section of a `flake.lock` file that pins [Nixpkgs] to a specific revision:
+
+```json title="flake.lock"
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1668703332,
+        // A SHA of the contents of the flake
+        "narHash": "sha256-PW3vz3ODXaInogvp2IQyDG9lnwmGlf07A6OEeA1Q7sM=",
+        // The GitHub org
+        "owner": "NixOS",
+        // The GitHub repo
+        "repo": "nixpkgs",
+        // The specific revision
+        "rev": "de60d387a0e5737375ee61848872b1c8353f945e",
+        // The type of input
+        "type": "github"
+      }
+    }
+    // Other inputs
+  }
+}
+```
+
+If this `flake.lock` were alongside a `flake.nix` with this [input block](#inputs)...
+
+```nix title="flake.nix"
+{
+  inputs = {
+    nixpkgs.url = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs }: {
+    # Define outputs here
+  };
+}
+```
+
+...the `nixpkgs` attribute would be implicitly pinned to the `de60d387a0e5737375ee61848872b1c8353f945e` revision&mdash;even though that revision information isn't in Nix code itself.
+
+### Flake registries \{#registries}
+
+[_Flake registries_][registry-official] are a convenience feature that enables you to refer to flakes using symbolic identifiers rather than full flake references.
+The most widely used symbolic identifier is `nixpkgs`, which is an alias for the `github:NixOS/nixpkgs/nixpkgs-unstable` flake [reference](#references)
+
+Some symbolic identifiers that you may encounter:
+
+| Symbolic identifier          | Full flake reference                    |
+| :--------------------------- | :-------------------------------------- |
+| [`nixpkgs`][nixpkgs]         | `github:NixOS/nixpkgs/nixpkgs-unstable` |
+| [`flake-utils`][flake-utils] | `github:numtide/flake-utils`            |
+| [`home-manager`][hm]         | `github:nix-community/home-manager`     |
+
+The full default global flake registry is kept as a [JSON file][registry-json].
+
+Here's an example flake that uses symbolic identifiers:
+
+```nix title="flake.nix"
+{
+  outputs = { self, nixpkgs, flake-utils }:
+    let
+      pkgs = import nixpkgs { inherit system; };
+    in flake-utils.lib.eachDefaultSystem (system: {
+      devShells.default = pkgs.mkShell {
+        packages = with pkgs; [ curl git jq wget ];
+      };
+    });
+}
+```
+
+Note that the [`inputs` block](#inputs) has been omitted in this flake.
+Using flake registries is always optional.
+
+## Flake outputs \{#outputs}
+
+_Flake outputs_ are what a flake produces as part of its build.
+Each flake can have many different outputs simultaneously, including but not limited to:
+
+- [Nix packages][packages]
+- [Nix development environments][env]
+- [NixOS] configurations
+- [Nix templates](#templates)
+
+Flake outputs are defined by a function, which takes an attribute set as input, containing each of the inputs to that flake (named after the chosen identifier in the [inputs](#inputs) section).
+
+### Exporting functions \{#functions}
+
+In addition to things like packages and NixOS configurations, flakes can also output Nix [functions] for use elsewhere.
+[Nixpkgs], for example, outputs many helper functions via the `lib` attribute.
+
+<Admonition info title="The `lib` convention">
+  The convention of using `lib` to output functions is observed not just by
+  Nixpkgs but by many other Nix projects. You're free, however, to output
+  functions via whichever attribute you prefer.
+</Admonition>
+
+Here's an example flake that outputs a `sayHello` function, via the `lib` attribute, that takes a name as an input and outputs a string saying hello to a person with that name:
+
+```nix title="flake.nix"
+{
+  outputs = { self }: {
+    lib = {
+      sayHello = name: "Hello there, ${name}!";
+    };
+  };
+}
+```
+
+Another Nix flake could then specify this flake as an [input](#inputs) and use `sayHello` for whatever purpose.
+
+### System specificity
+
+Some flake outputs need to be [system specific][specificity], including [packages], [development environments][env], and [NixOS] configurations.
+Here's an example flake that outputs a package that can be used by `x86_64-linux` systems (64-bit AMD/Intel Linux):
+
+```nix title="flake.nix"
+{
+  outputs = { self, nixpkgs }: let
+    # Declare the system
+    system = "x86_64-linux";
+    # Use a system-specific version of Nixpkgs
+    pkgs = import nixpkgs { inherit system; };
+  in {
+    # Output `ponysay` as the default package of the flake
+    packages.${system}.default = pkgs.ponysay;
+  };
+}
+```
+
+In many cases, however, you'll need to output things like [packages] or [development environments][env] for multiple systems.
+Helper libraries like [`flake-utils`][flake-utils] provide convenient mechanisms for doing that.
+You can also use Nix functions like this:
+
+```nix title="flake.nix"
+{
+  outputs = { self, nixpkgs }: let
+    # The set of systems to provide outputs for
+    allSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+
+    # A function that provides a system-specific Nixpkgs for the desired systems
+    forAllSystems = f: nixpkgs.lib.genAttrs allSystems (system: f {
+      pkgs = import nixpkgs { inherit system; };
+    });
+  in {
+    packages = forAllSystems ({ pkgs }: {
+      default = {
+        # Package definition
+      };
+    });
+  };
+}
+```
+
+## Flake templates \{#templates}
+
+[_Flake templates_][init] enable you to either initialize a new Nix project with pre-supplied content or add a set of files to an existing project.
+You can initialize a flake template using the [`nix flake init`][init] command.
+Flakes can [output](#outputs) templates using the `templates` attribute.
+Here's an example:
+
+```nix title="flake.nix"
+{
+  outputs = { self }: {
+    templates = {
+      starter-template = {
+        path = ./my-starter-template;
+        description = "A getting started template for a new Nix project";
+      };
+    };
+  };
+}
+```
+
+If you ran `nix flake init --template <reference>` against this template definition, Nix would copy the contents of the `./my-starter-template` directory into the current directory (without overwriting existing files).
+
+[22-11]: https://github.com/nixOS/nixpkgs/tree/release-22.11
+[branch]: https://github.com/nixos/nixpkgs/tree/nixos-24.05
+[channels]: /concepts/channels
+[env]: /concepts/dev-env
+[fh-nixpkgs]: https://flakehub.com/flake/NixOS/nixpkgs
+[flake-utils]: https://github.com/numtide/flake-utils
+[flakehub]: https://flakehub.com
+[functions]: /concepts/nix-language
+[gh]: https://github.com
+[gh-z2n]: https://github.com/DeterminateSystems/zero-to-nix
+[hash]: https://github.com/DeterminateSystems/zero-to-nix/tree/d51c83a5d206e882a6f15a282e32b7079f5b6d76
+[hm]: https://github.com/nix-community/home-manager
+[init]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init
+[json]: https://json.org
+[lang]: /concepts/nix-language
+[manual]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake#flake-inputs
+[nixos]: /concepts/nixos
+[nixpkgs]: /concepts/nixpkgs
+[other]: https://github.com/DeterminateSystems/zero-to-nix/tree/other
+[packages]: /concepts/packages
+[pinning]: /concepts/pinning
+[refs-official]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake#flake-references
+[registry-json]: https://github.com/NixOS/flake-registry/blob/master/flake-registry.json
+[registry-official]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-registry
+[flake-checker]: https://github.com/DeterminateSystems/flake-checker
+[run]: /start/nix-run
+[specificity]: /concepts/system-specificity
+[unstable]: https://github.com/NixOS/nixpkgs/tree/nixpkgs-unstable
+
+---
+
+**Hermeticity**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/hermeticity
+
+_Hermeticity_ is a property of Nix builds, which isolates them from the host system via various mechanisms.
+This results in a system where the same set of source inputs will always map to the same build outputs,
+because changes on the host can not affect a build.
+
+Any system which is not hermetic is called "impure", implying that changes outside of the input set can have an impact on the build result.
+This is the inverse of Nix's "purity" property.
+
+---
+
+**Incremental builds**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/incremental-builds
+
+_Incremental builds_ are build processes that don't need to build the entire dependency tree of a software artifact every time because they use mechanisms like intelligent [caching] to avoid rebuilding artifacts that are already available.
+Nix is one of several available build systems that offers incremental builds.
+
+## How Nix provides incremental builds \{#how}
+
+Nix is one of several build systems that offers incremental builds for [Nix packages][packages] by storing all build results in the [Nix store][store].
+
+Whenever Nix builds a [package][packages], it builds the entire [closure], or dependency tree, of that package.
+
+<NixStorePath pkg="git-2.27.3" />
+
+The hash portion enables Nix to "know" what doesn't need to be built.
+If the package `super-important-dependency` is necessary to build the package `final-production-artifact`, Nix can inspect the [derivation] for `super-important-dependency` and calculate a hash for that dependency and, thus, a Nix store path for it, something like this:
+
+<NixStorePath
+  pkg="super-important-dependency"
+  hash="m7hsk1m4jkwy6pnns5gpn1kss22raan4"
+  valueOnly
+/>
+
+With that information in hand, Nix can then check to see if one of these places already has the artifact:
+
+- The local [Nix store][store]
+- One of your configured [binary caches][binary] (if any)
+
+Nix builds a given derivation only if it fails to discover a realised artifact in one of these places.
+This can make a huge difference when building large [closures][closure].
+
+## Consequences of incremental builds in Nix \{#consequences}
+
+[Packages] are in many ways the central organizing artifact in Nix.
+[Nix development environments][env] make packages available in a hermetically sealed way, [NixOS] is built with Nix packages as its basis, and so on.
+What that means is that incremental builds in Nix make pretty much everything associated with Nix much faster and less resource intensive.
+
+[binary]: /concepts/caching#binary-caches
+[caching]: /concepts/caching
+[closure]: /concepts/closures
+[derivation]: /concepts/derivations
+[ds]: https://determinate.systems
+[env]: /concepts/dev-env
+[nixos]: /concepts/nixos
+[packages]: /concepts/packages
+[realisation]: /concepts/realisation
+[store]: /concepts/nix-store
+
+---
+
+**The Determinate Nix Installer**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nix-installer
+
+The [Determinate Nix Installer][install] is a fast and stable Nix installer created by [Determinate Systems][ds].
+It currently supports both Linux and macOS.
+
+{/* <Brief id="nix-installer-differences" /> */}
+
+## Using the Determinate Nix Installer \{#using}
+
+You can run the installer on your system using this command:
+
+```shell title="One command to install Nix"
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
+
+For a more complete guide, see [Get Nix running on your system][start] here in Zero to Nix.
+
+[ds]: https://determinate.systems
+[install]: https://github.com/DeterminateSystems/nix-installer
+[start]: /start/install
+
+---
+
+**The Nix language**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nix-language
+
+Nix is the _programming language_ that powers the Nix _packaging system_.
+
+## Why a programming language?
+
+You might ask yourself why Nix even _needs_ a programming language.
+Why can't packages be declared via some JSON, YAML, or TOML schema?
+The problem with that lies in the dynamic nature of how Nix configures packages and allows them to be combined.
+Nix as a _programming language_ can be thought of as a kind of "JSON, but with functions".
+All statements are [declarative], meaning that there's no sequential flow of instructions that makes up a Nix package.
+Instead functions are called that assign values to fields in _attribute sets_, which in turn may get assigned to other values.
+
+## How does Nix work?
+
+Nix uses a few important characteristics in programming language design to work.
+Some of these terms can seem daunting, when you're not already familiar with what they mean and how they work with each other.
+So first, let's cover these principles:
+
+_Nix_ is a pure, functional, lazy, declarative, and reproducible programming language.
+
+| Concept                                   | Description                                                                                                                                     |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pure                                      | A programming-language design concept by which functions can not cause _side effects_. The only result is the one a function returns            |
+| Functional                                | A programming-language design concept by which _functions_ can be passed as function arguments, and returned as results                         |
+| Lazy                                      | A programming-language design concept by which functions and data collections are not evaluated until they are needed to complete a computation |
+| Declarative                               | Describing a system outcome, instead of instructing the computer _how_ to achieve the outcome                                                   |
+| [Reproducible](/concepts/reproducibility) | An operation that is performed twice yields the same result. The same inputs map to the same outputs                                            |
+
+## Syntax basics
+
+As mentioned previously, Nix uses _assignments_ to compute and process data for packages, modules, and other utilities.
+The code below, for example, calls a function called `my_function` with the parameters `2` and `3`, and assigns its output to the `my_value` field.
+
+```nix title="Assignments"
+{
+  my_value = my_function 2 3;
+}
+```
+
+Functions are defined using this syntax, where `x` and `y` are attributes passed into the function:
+
+```nix title="Functions"
+{
+  my_function = x: y: x + y;
+}
+```
+
+The body of the function automatically returns the result of the function.
+As you can see in the example above, functions are called by spaces between it and its parameters.
+No commas are needed to separate parameters.
+
+The two most common data structures are _attribute sets_ and _lists_.
+Attribute sets are key-value stores.
+Lists can contain different types of values and don't need to be comma separated.
+
+```nix title="Recursive attributes"
+rec {
+  number_key = 5;
+  list_key = [ number_key true "Hello" ];
+}
+```
+
+The `rec` keyword allows the attribute set to reference itself.
+
+For a more detailed breakdown of syntax, check out the [Nix language](https://nixos.org/manual/nix/stable/language) manual section.
+
+## Derivations
+
+One thing that sets Nix apart from other programming languages&mdash;and makes it much more than just a configuration language&mdash;is the `derivation` function.
+This is a built-in function that you use to define the build process for packages.
+See the [derivations] concept doc for more info.
+
+[declarative]: /concepts/declarative
+[derivations]: /concepts/derivations
+
+---
+
+**The Nix store**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nix-store
+
+The _Nix store_ is a storage system in your filesystem with its root at `/nix/store` by default.
+The Nix daemon stores several things in the Nix store:
+
+- [Derivations]: stand-alone files suffixed with `.drv` such as `/nix/store/<hash>-my-package.drv`
+- The products of [derivations]: a folder containing build outputs such as `/nix/store/<hash>-my-package/`
+- [Patches]: stand-alone files suffixed with `.patch` such as `/nix/store/<hash>-my-package.patch`
+
+## Store paths
+
+Paths in the Nix store have this structure:
+
+<NixStorePath pkg="my-package-1.0" />
+
+Let's break store paths down into their constituent elements:
+
+1. The **root path** is `/nix/store` by default.
+2. The **input hash** is derived from the inputs to the [derivation][derivations] used to build the package
+3. The **package name** is provided by the package creator
+
+Some important things to note about store paths in Nix:
+
+- The root path at `/nix/store` doesn't conflict with other standard system paths like `/usr/bin`.
+- The hash ensures that two packages with the same name have completely different paths if the inputs to the package differ _at all_. If you were to change one letter in one file in the inputs to `my-package-1.0`, for example, you may end up with a store path like `/nix/store/1aq3wchnvv7yn0d6y1r3j129hjqmv2k3-my-package-1.0`.
+- Package names are fundamentally arbitrary. You can provide whatever naming conventions you wish. If you don't want your packages to have a concept of version, you can name them `my-package` and distinguish based on the input hash.
+
+[derivations]: /concepts/derivations
+[patches]: https://nixos.org/manual/nixpkgs/stable/#sec-patches
+
+---
+
+**Package management**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/package-management
+
+_Package management_ is the art of building and distributing software [packages].
+
+[Nix] is different from package managers like [apt], [dpkg], and [yum] in several important ways:
+
+- Nix always builds all [packages] from scratch, including the entire [closure], or dependency tree, of that package.
+  But if a dependency is already present in the [Nix store][store] or in a remote cache, Nix can use that instead of rebuilding it, which means that Nix can provide [incremental builds][incremental].
+- Nix has a [language]&mdash;also called _Nix_&mdash;that you can use to define your own package builds
+- Nix works on several platforms, including Linux, macOS, and Windows WSL.
+
+[apt]: https://en.wikipedia.org/wiki/APT_(software)
+[closure]: /concepts/closures
+[dpkg]: https://man7.org/linux/man-pages/man1/dpkg.1.html
+[incremental]: /concepts/incremental-builds
+[language]: /concepts/nix-language
+[nix]: /concepts/nix
+[packages]: /concepts/packages
+[store]: /concepts/nix-store
+[yum]: https://es.wikipedia.org/wiki/Yum_(software)
+
+---
+
+**Nix**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nix
+
+[*Nix*][nix] can be a somewhat confusing term because it refers to multiple things:
+
+1. The pure and functional [programming language][lang]
+2. The [Nix CLI](#cli)
+3. The overall Nix [package management system][package-management]
+
+All of these are closely interrelated and should be thought of as a single tool.
+In this document, we'll go over each of these three aspects of Nix.
+
+<Admonition info open title="Nix and open source" id="nix-oss">
+The Nix project is fully open source and largely developed within the [`NixOS`][nixos-org] organization on [GitHub].
+It's licensed under [LGPL 2.1][license], which is generally quite permissive regarding commercial use.
+
+We at Determinate Systems have actively contributed to Nix as an open source project in the past&mdash;alongside countless talented individuals&mdash;and will continue to do so as part of our [mission] to make Nix better.
+We have also created [Determinate Nix][det-nix], a downstream distribution of Nix intended for enterprise.
+</Admonition>
+
+## The Nix CLI \{#cli}
+
+There are two different Nix CLIs currently active:
+
+- The [unified Nix CLI](#unified-cli) is currently experimental but, from the standpoint of [Determinate Systems][ds], recommended for using Nix.
+  It wraps all Nix functionality into a single `nix` executable and supports [flakes]
+- The [original Nix CLI](#original-cli), which is currently standard but, from the standpoint of [Determinate Systems][ds], _not_ recommended for using Nix.
+
+### The unified CLI \{#unified-cli}
+
+The _unified CLI_ is a still-experimental way of using Nix that involves just one executable called `nix`.
+_All_ Nix functionality is wrapped into this tool, including commands like `nix build` for building [packages] instead of the old `nix-build` tool, `nix develop` for activating Nix [development environments][env] instead of the old `nix-shell` tool, `nix store` for managing the [Nix store][store] instead of the old `nix-store` tool, and more.
+Because the unified CLI isn't yet official, it needs to be explicitly enabled in your Nix configuration by adding `nix-command` to your `experimental-features` list.
+
+We won't cover setting up the unified CLI here because the [Determinate Nix Installer][install] both installs it and enables it in your Nix configuration.
+
+### The original CLI \{#original-cli}
+
+The _original CLI_ for Nix is still the official CLI but, as we mention above, not recommended for new Nix users for two reasons:
+
+1. It's incompatible with [Nix flakes][flakes] as it was created before the inception of flakes.
+1. It presents significant cognitive overhead in comparison with the [unified CLI](#unified-cli) because it requires you to learn a wide variety of CLI tools, including `nix-build` for building [packages], `nix-shell` for Nix [development environments][env], `nix-store` for managing the [Nix store][store], and several more.
+
+The [Determinate Nix Installer][install] enables the [unified CLI](#unified-cli) by default, but leaves the tools from the original CLI accessible.
+
+[det-nix]: https://docs.determinate.systems/determinate-nix
+[ds]: https://determinate.systems
+[env]: /concepts/dev-env
+[flakes]: /concepts/flakes
+[github]: https://github.com
+[install]: /concepts/nix-installer
+[lang]: /concepts/nix-language
+[license]: https://github.com/nixOS/nix?tab=LGPL-2.1-1-ov-file
+[mission]: https://determinate.systems/posts/we-want-to-make-nix-better
+[nix]: https://nixos.org
+[nixos-org]: https://github.com/NixOS
+[packages]: /concepts/packages
+[package-management]: /concepts/package-management
+[store]: /concepts/nix-store
+
+---
+
+**Packages**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/packages
+
+Nix _packages_ are self-contained bundles that are built using [derivations] and provide some kind of software or dependencies of software on your computer.
+A package can have dependencies on other packages, which are encoded in its [closure].
+Each package lives at a unique path in the [Nix store](/concepts/nix-store) indexed by its name and its input hash.
+
+[closure]: /concepts/closures
+[derivations]: /concepts/derivations
+
+---
+
+**Pinning dependencies**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/pinning
+
+_Pinning_ a dependency refers to the act of specifying an exact revision for Nix to use.
+This is particularly interesting in relation to Nix's [reproducibility](/concepts/reproducibility) guarantees.
+
+When you pin Nix dependencies to a specific revision you are guaranteed to get the same outputs of builds, based on the same inputs, which cannot change.
+This is particularly useful when sharing environments between different developers, or between a development and production environment.
+
+Pinning dependencies can be done in the `inputs` section of the flakes file:
+
+```nix title="flake.nix"
+{
+  inputs = {
+    nixpkgs.url = "git+https://github:nixos/nixpkgs?rev=fdc8ef970de2b4634e1b3dca296e1ed918459a9e";
+  };
+}
+```
+
+---
+
+**NixOS**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nixos
+
+_NixOS_ is a [Linux] distribution based on [Nix].
+It's unique amongst distributions because it enables you to use the [Nix language][lang] to [declaratively configure][declarative] your operating system in a [`configuration.nix` file](#configuration).
+And that configurability runs quite deep, including things like the system's [boot loader][boot], the [filesystem], [window managers][window], [kernel modules][kernel], services like [OpenSSH], and much more.
+
+In addition to being a fundamentally [configurable](#configuration) distribution, Nix provides NixOS with a variety of unique [features](#features), such as [atomic system updates](#atomicity), [system rollbacks](#rollbacks), and robust [multi-user support](#multi-user).
+
+## The role of Nix \{#nix}
+
+Everything in a NixOS system is configured using the [Nix language][lang] and the NixOS [module system](#modules).
+Rather than installing [packages] and setting up your system in an ad-hoc way, you can [declare][declarative] which specific system you'd like to have&mdash;networking stack, filesystem, users, and more&mdash;and Nix builds the system for you from the ground up, installing all the required [packages], providing necessary configuration files, and making other declared changes.
+
+## Features
+
+NixOS uses [Nix] as its [package manager][pkg] rather than [APT], [dpkg], or any of the other options for Linux.
+Nix enables NixOS to provide a range of unique features.
+
+### Generations
+
+Unlike other Linux distributions, updates to NixOS system state constitute atomic _generations_ with a number.
+Each time you run `nixos-rebuild switch` to apply your desired [system configuration](#configuration), Nix increments the generation.
+One of the core advantages of generations is that you can switch between [atomic versions](#atomicity) of your system state at will.
+
+### Atomic system updates \{#atomicity}
+
+Any time you change your NixOS [configuration](#configuration), you can apply that configuration by running [`nixos-rebuild switch`][rebuild].
+When you do that, NixOS installs or upgrades any [packages] that need to be installed or upgraded according to your system configuration.
+And as is always the case with Nix, each package is [realised] from scratch and stored in the [Nix store][store] rather than in directories like `/bin` or `/usr/bin`, as on systems that use the [Filesystem Hierarchy Standard][fhs].
+
+### Rollbacks
+
+As with [system updates](#atomicity), NixOS enables you to roll your system back to a previous generation using `nixos-rebuild switch --rollback`.
+Rollbacks are fully [atomic](#atomicity) and include [packages], system configuration, and anything else specified in the NixOS configuration.
+
+### Multi-user support \{#multi-user}
+
+NixOS doesn't follow the [Filesystem Hierarchy Standard][fhs], instead using the [Nix store][store] for everything, including not just [packages] but also [derivations] and other artifacts.
+This enables NixOS to support an indefinite number of user _profiles_ in an elegant way.
+Two different users on the same NixOS host can use different versions of [Git], for example, because instead of sharing a global `git` in a location like `/usr/bin/git`, two different users can use `git` executables from Nix store paths instead:
+
+- `/nix/store/sglc12hc6pc68w5ppn2k56n6jcpaci16-git-2.38.1/bin/git`
+- `/nix/store/8nwsswymka208dpmsy09aydgffvg4bbi-git-2.38.0/bin/git`
+
+Below is a diagram of the first path above:
+
+<NixStorePath pkg="git-2.38.1" bin="git" />
+
+Let's break store paths down into their constituent elements:
+
+1. The **root path** is `/nix/store` by default.
+2. The **hash** is derived from the [derivation][derivations] used to build the package.
+3. The **package name** is an arbitrary slug provided by the package creator.
+
+## Configuration
+
+With most Linux distributions, you assemble your desired system in a procedural way using shell scripts and ad-hoc commands like [`apt-get install`][apt].
+By contrast, NixOS enables you to define your desired system using the [Nix language][lang]. By default, this is in a `configuration.nix` file stored in `/etc/nixos`.
+Here's an example configuration:
+
+```nix title="/etc/nixos/configuration.nix"
+{ pkgs, ... }: # A pinned version of Nixpkgs passed to the configuration by Nix
+
+{
+  # Enable Nix flakes and the unified Nix CLI
+  nix.settings = {
+    experimental-features = "nix-command flakes";
+  };
+
+  # Networking configuration
+  networking.hostName = "justme-dev-box";
+
+  # Enable OpenSSH
+  services.openssh.enable = true;
+
+  # Root filesystem
+  fileSystems."/" = {
+    device = "/dev/sda1";
+    fsType = "ext4";
+  };
+
+  # Create a user
+  users.users.justme = {
+    isNormalUser = true;
+    initialPassword = "changemeplz";
+  };
+
+  # CLI tools, language runtimes, shells, and other desired packages
+  environment.systemPackages = with pkgs; [
+    curl
+    jq
+    wget
+    git
+    python
+    openssl
+    zsh
+  ];
+}
+```
+
+This command applies the configuration above:
+
+```shell title="Rebuild your NixOS system"
+nixos-rebuild switch
+```
+
+No complex shell scripts, no sequence of install or build commands, just a single instruction to build the entire system according to your specifications.
+
+### Modules
+
+A _module_ is a piece of Nix code that you can configure to produce configuration.
+In NixOS, a module is a function that takes an attribute set and returns another attribute set.
+The basic anatomy of a module can be seen in this code snippet:
+
+```nix title="/etc/nixos/configuration.nix"
+{ lib, config, pkgs, ... }:
+
+{
+  imports = [];
+  config = {};
+  options = {};
+}
+```
+
+<Admonition info title="Why does my `configuration.nix` look different?" id="why-configuration-nix">
+When you first have a look at NixOS you will undoubtedly see a `configuration.nix` file in `/etc/nixos/`.
+Furthermore, if you look at other people's NixOS configurations, you might not see this exact structure.
+
+For one, the input set can be shortened (in the most extreme case to just `{ ... }`).
+See the [Nix syntax](/concepts/nix) section for details on what this does.
+
+Additionally, there is some syntactic sugar around NixOS modules, which allow you to omit the `config` key, if your module does not declare any `options`.
+As an example, these two modules are equivalent to each other.
+
+```nix title="Equivalent NixOS modules"
+# Module 1
+{ ... }:
+{
+  imports = [ ./my-fish-config.nix ];
+  programs.fish.enable = true;
+}
+
+# Module 2
+{ ... }:
+{
+  imports = [ ./my-fish-config.nix ];
+  config = {
+    programs.fish.enable = true;
+  };
+}
+```
+
+</Admonition>
+
+### How to use modules
+
+First up, you can find modules to use and how to use them via the NixOS [module search][search].
+Nix modules generally follow the [declarative] principle, meaning that there's no precise order in which modules are executed.
+Instead, you describe the desired outcome of a system, which Nix then produces for you.
+
+Following is an example of how to setup and configure the [nginx] web server.
+
+```nix title="nginx web server example"
+{ ... }:
+
+{
+  services.nginx = {
+    enable = true;
+    virtualHosts."default" = {
+      forceSSL = true;            # Redirect HTTP clients to an HTTPs connection
+      default = true;             # Always use this host, no matter the host name
+      root = /var/www/my-website; # Set the web root to serve
+    };
+  };
+}
+```
+
+## Releases
+
+There are two major NixOS [releases] per year.
+Release slugs have the form `{year}.{month}`, so `22.05` corresponds to May 2022, `20.09` corresponds to September 2020, and so on.
+Because you configure NixOS using Nix, you can always [pin] specific packages and dependencies to whichever revisions you like.
+
+[apt]: https://en.wikipedia.org/wiki/APT_(software)
+[boot]: https://wiki.nixos.org/wiki/Bootloader
+[declarative]: /concepts/declarative
+[derivations]: /concepts/derivations
+[dpkg]: https://debian.org/doc/manuals/debian-faq/pkgtools
+[fhs]: https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
+[filesystem]: https://nixos.org/manual/nixos/stable/#ch-file-systems
+[git]: https://git-scm.com
+[kernel]: https://wiki.nixos.org/wiki/Linux_kernel
+[lang]: /concepts/nix-language
+[linux]: https://kernel.org
+[nginx]: https://nginx.org
+[nix]: /concepts/nix
+[openssh]: https://openssh.com
+[packages]: /concepts/packages
+[pin]: /concepts/pinning
+[pkg]: /concepts/package-management
+[realised]: /concepts/realisation
+[rebuild]: https://wiki.nixos.org/wiki/Nixos-rebuild
+[releases]: https://nixos.org/blog/announcements
+[search]: https://search.nixos.org/options
+[store]: /concepts/nix-store
+[window]: https://wiki.nixos.org/wiki/Category:Window_managers
+
+---
+
+**Nixpkgs**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/nixpkgs
+
+_Nixpkgs_ (pronounced "Nix packages") is a big collection of [Nix] expressions, packages (who'd have thought...), and build utilities for the Nix ecosystem.
+It is sometimes also called a "Nix standard library" (or Nix stdlib).
+
+Nixpkgs is a mono repo, containing over 80,000 package definitions and the utilities to maintain this set of packages.
+It also contains [NixOS](/concepts/nixos) modules and anything required to build and deploy a full Nix system.
+Many tools in the Nix ecosystem depend on this standard library to function.
+
+[nix]: https://nixos.org
+
+---
+
+**Provenance**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/provenance
+
+_Provenance_ is a term that's basically synonymous for the origins of a thing.
+In software, provenance usually refers to the build process that created an artifact (a program, a file, a smartphone app, and so on).
+
+Without establishing the provenance of a piece of software&mdash;like the code it was built from or the server it was downloaded from&mdash;it's hard to know how much you should trust that piece of software.
+Is it a useful piece of software created by people you trust?
+Or does it masquerade as a useful piece of software while doing something you don't want, like mining secrets from your filesystem or mining Bitcoin?
+Establishing the provenance of that software usually helps to answer that question.
+
+---
+
+**Realisation**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/realisation
+
+_Realisation_ is the process whereby a Nix [derivation] is transformed into a [package].
+While a derivation is essentially a plan for a package, realisation is the build process turns that plan into an actual output directory full of content.
+
+## `.drv` files
+
+When you run [`nix build`][nix-build] to build a package, the Nix CLI first looks at the [`derivation`][derivation] function for the function and transforms it into an intermediate [`.drv` file][drv], which is essentially a formal representation of the `derivation` function.
+All `.drv` files are stored in the [Nix store][store] with a hashed path, such as `/nix/store/m2nb4d0pfydr8bq5ww1yqbrkvvf18zbl-perl-5.36.0.drv`, which ensures that _any_ change in a `derivation` function results in a new `.drv` file with a new path.
+The CLI then uses the `.drv` file as the blueprint for the actual build process, which always builds the package's entire dependency tree.
+
+## The build process
+
+Once Nix has built a `.drv` file for the derivation, it uses the encoded instructions in the file to actually build the package in a [sandboxed] environment, which essentially means that realisation doesn't rely on or affect any global state on your machine, such as configuration files in `/etc`.
+Everything required for the build process is drawn from:
+
+1. The build instructions in the derivation. For example, commands like `cat`, `touch`, `mkdir`, and `mv`.
+1. Artifacts from the [Nix store][store].
+   If you write a derivation with [Git] as a build input, for example, the realisation process builds Git and stores the resulting package in the [Nix store][store] (if it isn't already built and stored there) and uses that package when the `git` command is invoked in the build logic, rather than a "global" Git at a path like `/usr/bin/git`.
+
+[derivation]: /concepts/derivations
+[drv]: https://nixos.org/guides/nix-pills/our-first-derivation
+[git]: https://git-scm.com
+[nix-build]: https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-build
+[package]: /concepts/packages
+[sandboxed]: /concepts/sandboxing
+[store]: /concepts/nix-store
+
+---
+
+**Reproducibility**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/reproducibility
+
+_Reproducibility_ is a software design concept, where an operation for the same inputs yields the same output.
+This is an important property for Nix, because hashes are based on the inputs of a build,
+and thus it must be guaranteed that the same inputs yield in the same build output.
+
+```nix title="Example derivation"
+{ stdenv, fetchGit }:
+
+stdenv.mkDerivation {
+  name = "my-package";
+  src = fetchgit {
+    url = "https://github.com/DeterminateSystems/riff";
+    sha256 = "sha256-7mnx7J0AacL2P2mNuNNB+kKE7VR8nniVG+PSrwpZixE=";
+  };
+}
+```
+
+The above code consists of _two_ derivations: `fetchgit` and `mkDerivation`.
+
+The reproducibility of `mkDerivation` is guaranteed because the output of `fetchgit` is pinned to a particular hash.
+And because `mkDerivation` itself isn't allowed to touch the network, and is [hermetically](/concepts/hermeticity) sealed from the host, no impurities in the build can exist.
+
+The output of `fetchgit` is guaranteed because its output is fixed to a particular hash.
+While it _can_ touch the network, it will fail to build if the output from the fetch doesn't match the user-provided output hash.
+
+You can see how the reproducibility of Nix builds are layered, like a packaging onion.
+
+---
+
+**Sandboxing**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/sandboxing
+
+Whenever Nix builds anything, it _sandboxes_ that process from everything else on the host system.
+Nix builds are sandboxed for a variety of reasons:
+
+1. The ensure [reproducibility].
+   Sandboxing ensures that no system state on the host machine affects the build outcomes.
+1. To maintain strict [provenance].
+
+[reproducibility]: /concepts/reproducibility
+[provenance]: /concepts/provenance
+
+---
+
+**System specificity**
+
+Published: 
+URL: https://zero-to-nix.com//concepts/system-specificity
+
+In Nix, the term _system specificity_ expresses the fact that all Nix [derivations] have a `system` attribute that specifies which system the derivation is built on.
+In order to realize a Nix derivation into a [package], each derivation in the package's closure needs to be supported on the target system.
+So if you want to build the package `foo` on an `x86_64-linux` system, any dependency of the `foo` derivation needs to be supported on `x86_64-linux`.
+
+System specificity is essential to Nix being a truly multi-platform system.
+Because all derivations&mdash;and thus all packages&mdash;are system specific, things like Nix [development environments][env] and [NixOS] configurations are also system specific.
+
+[derivations]: /concepts/derivations
+[env]: /concepts/dev-env
+[nixos]: /concepts/nixos
+[package]: /concepts/packages
+
+---
+
+## Other formats
+
+For additional LLM-oriented manifests, see also:
+
+- [`llms-small.txt`](https://zero-to-nix.com/llms-small.txt) (compact structure-only version)
+- [`llms.txt`](https://zero-to-nix.com/llms.txt) (the main version)
+
+## Other Determinate Systems projects
+
+These other projects under the Determinate Systems umbrella have their own LLM-oriented manifests:
+
+- [FlakeHub](https://flakehub.com/llms.txt) (FlakeHub is a platform for publishing and discovering Nix flakes and Nix artifacts, featuring semantic versioning, private flakes with federated, JWT-based authentication, flake discovery via search, labels, and other means, and next-generation Nix binary caching with FlakeHub Cache.)
+- [Determinate documentation](https://docs.determinate.systems/llms.txt) (Determinate is Nix for teams: Stop wrestling with binary caches, reinventing deploy scripts, and figuring out access controls. Confidently adopt and scale Nix across teams of any size.)
+- [Determinate Systems website](https://determinate.systems/llms.txt) (Our goal for Determinate is to enable fearless innovation by bringing Nix to teams, providing a complete Nix-based workflow from installation through collaboration and CI to deployment.)
