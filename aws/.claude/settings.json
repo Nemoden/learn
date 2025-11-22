@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/opt/homebrew/share/awscli/examples/**)"
+    ]
+  },
+  "includeCoAuthoredBy": false,
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "AWS_PROFILE": "claude"
+  },
+  "outputStyle": "Learning"
+}
