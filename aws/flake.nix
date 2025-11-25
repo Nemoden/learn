@@ -13,14 +13,13 @@
 
         pythonEnv = pkgs.python3.withPackages (ps: with ps; [
           boto3        # AWS SDK for Python (includes botocore automatically)
+          boto3-stubs  # otherwise boto3 is PITA to use
+          pip          # Python package installer
         ]);
       in
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            # AWS CLI (standalone)
-            awscli2
-
             # Python with AWS SDK
             pythonEnv
 
@@ -29,6 +28,7 @@
 
             # Infrastructure as Code
             opentofu
+            aws-sam-cli
           ];
 
           shellHook = ''
@@ -36,11 +36,13 @@
             echo ""
             echo "Available tools:"
             echo "  - aws (CLI v2)"
-            echo "  - python3 with boto3"
+            echo "  - sam (Serverless Application Model CLI)"
+            echo "  - python3 with boto3 and pip"
             echo "  - kubectl, opentofu"
             echo ""
             echo "Quick start:"
             echo "  aws configure  # Set up credentials"
+            echo "  sam init       # Create serverless project"
             echo "  python3        # Start Python REPL with boto3"
           '';
         };

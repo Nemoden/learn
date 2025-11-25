@@ -1,0 +1,1 @@
+- [2025-11-25] AWS::S3Vectors - Vector embeddings storage on S3 for AI/ML applications (semantic search, RAG, similarity matching)

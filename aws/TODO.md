@@ -1,0 +1,2 @@
+- Add a simple sqlite3 database to track knowledge anki-style, teach claude how to use it
+- Add a simple python script for a view layer for the sqlite3 database (simple CRUD + flashcards)

@@ -1,8 +1,24 @@
-# File Sharing Service - Learning & Build Plan
+# File Sharing Service - Teaching Plan (for Claude)
 
-**Purpose**: This plan tracks teaching progress across sessions. Each checkbox represents a teaching module or implementation phase to be completed sequentially.
+**🎯 Primary Audience**: Claude (AI teaching assistant)
+**📋 Purpose**: This is Claude's teaching script. It defines what to teach, when to teach it, and how to guide the user through building a production-ready file sharing service.
 
-**Project Goal**: Build a production-ready file sharing service using S3, Lambda, API Gateway, DynamoDB, Cognito, and IaC (CloudFormation/SAM/CDK).
+**How Claude Uses This File**:
+1. **Resume teaching** — Read "Session State" to see current sprint and next unchecked item
+2. **Teach systematically** — Follow checkboxes sequentially, teaching concepts just-in-time
+3. **Track progress** — Check boxes as user completes tasks
+4. **Guide implementation** — Walk user through "Implementation Steps" (don't just list them)
+5. **Verify work** — Use read-only AWS CLI access (`--profile claude`) to check what user deployed
+
+**How User Uses This File** (secondary):
+- See what's coming next
+- Track overall progress
+- Reference MUST-KNOWs and code examples
+- Understand the sprint structure
+
+**Teaching Approach**: Feature-driven sprints. Each sprint builds one working feature, teaching only the services needed for that feature. IaC (SAM) from day 1. This mirrors real-world engineering.
+
+**Project Goal**: Guide user to build a production-ready serverless file sharing service.
 
 ## Architecture Overview
 
@@ -13,349 +29,843 @@ User → Cognito (auth) → API Gateway → Lambda → S3 (files)
 ```
 
 **Core Features**:
-- User authentication & authorization
-- File upload/download with presigned URLs
-- File metadata storage (name, owner, size, sharing permissions)
+- User authentication & authorization (Cognito)
+- File upload/download with presigned URLs (S3)
+- File metadata storage (DynamoDB)
 - File sharing with other users
-- List user's files
-- Delete files
+- Background processing (SQS/SNS)
+- Full observability (CloudWatch, X-Ray)
+
+**Deployed with**: AWS SAM (Serverless Application Model) - IaC from Sprint 1
 
 ---
 
-## Phase 1: Foundation - S3 & Lambda Basics
+## Sprint 0: Environment Setup
 
-### 1.1 S3 - Simple Storage Service
-- [ ] **Teach S3 mental model**
-  - What: Object storage (key-value store for files)
-  - Why: Durable, scalable, cheap file storage
-  - When: Any file storage needs (images, videos, backups, static sites)
+### Goals
+- Install tools
+- Verify AWS access
+- Understand SAM workflow
 
-- [ ] **Essential S3 operations (Python SDK + CLI)**
-  - Create bucket: `s3.create_bucket()` / `aws s3 mb`
-  - Upload file: `s3.upload_file()` / `aws s3 cp`
-  - Download file: `s3.download_file()` / `aws s3 cp`
-  - List objects: `s3.list_objects_v2()` / `aws s3 ls`
-  - Delete object: `s3.delete_object()` / `aws s3 rm`
-  - Generate presigned URL: `s3.generate_presigned_url()`
+### Tasks
+- [x] **Install AWS SAM CLI**
+  - macOS: `brew install aws-sam-cli`
+  - Verify: `sam --version`
+  - Docs: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html
 
-- [ ] **S3 constraints & pitfalls**
-  - Bucket names are globally unique
-  - Max object size: 5TB (multipart upload for >5GB)
-  - Eventually consistent for overwrites/deletes
-  - Presigned URLs expire (set appropriate expiry)
-  - Use bucket policies + IAM for security
+- [x] **Verify AWS CLI access**
+  - You have admin access to build: `aws sts get-caller-identity --profile default`
+  - Note: Claude (your teaching assistant) has separate read-only access (`--profile claude`) to check your work
 
-- [ ] **Real-world example**: Upload a file to S3 via Python SDK, generate presigned URL, download via URL
+- [x] **Understand SAM workflow**
+  - `sam init` → creates project template
+  - `sam build` → packages code and dependencies
+  - `sam deploy` → deploys to AWS (creates CloudFormation stack)
+  - `sam local invoke` → test Lambda locally
 
-### 1.2 Lambda - Serverless Functions
-- [ ] **Teach Lambda mental model**
-  - What: Run code without managing servers
-  - Why: Pay per execution, auto-scales, event-driven
-  - When: APIs, event processing, scheduled tasks
-
-- [ ] **Essential Lambda operations (Python SDK + CLI)**
-  - Create function: `lambda.create_function()` / `aws lambda create-function`
-  - Invoke function: `lambda.invoke()` / `aws lambda invoke`
-  - Update code: `lambda.update_function_code()` / `aws lambda update-function-code`
-  - Get logs: CloudWatch Logs / `aws logs tail`
-  - List functions: `lambda.list_functions()` / `aws lambda list-functions`
-
-- [ ] **Lambda constraints & pitfalls**
-  - Max execution time: 15 minutes
-  - Max memory: 10GB
-  - Cold starts (1-3s delay for first request)
-  - `/tmp` storage: 10GB (ephemeral)
-  - Use layers for dependencies, not deployment package
-
-- [ ] **Real-world example**: Create Lambda that uploads a file to S3 when invoked
-
-### 1.3 Implementation: Basic File Upload
-- [ ] **Create Lambda function** that:
-  - Accepts file data in event
-  - Uploads to S3 bucket
-  - Returns S3 object key
-
-- [ ] **Test manually** via AWS CLI `lambda invoke`
+### Outcome
+✅ Ready to build with SAM
 
 ---
 
-## Phase 2: API Layer - API Gateway
+## Sprint 1: Hello World API (SAM from Day 1)
 
-### 2.1 API Gateway
-- [ ] **Teach API Gateway mental model**
-  - What: Managed REST/HTTP API frontend
-  - Why: Bridges HTTP requests to Lambda, handles auth, throttling, CORS
-  - When: Exposing Lambda functions as HTTP APIs
+### Goals
+- Create first Lambda function
+- Deploy with SAM template
+- Understand IaC basics
 
-- [ ] **Essential API Gateway operations (SDK + CLI)**
-  - Create REST API: `apigateway.create_rest_api()` / `aws apigatewayv2 create-api`
-  - Create route: `apigateway.put_integration()` / `aws apigatewayv2 create-route`
-  - Deploy API: `apigateway.create_deployment()` / `aws apigatewayv2 create-deployment`
-  - Get API endpoint: Check AWS Console or `aws apigatewayv2 get-apis`
+### New Services
+- **Lambda**: Serverless function execution
+- **API Gateway**: HTTP API frontend
+- **CloudFormation**: Infrastructure as code (via SAM)
 
-- [ ] **API Gateway constraints & pitfalls**
-  - Payload limit: 10MB (use presigned URLs for large files)
-  - Timeout: 29 seconds (Lambda can run longer but API Gateway will timeout)
-  - CORS must be configured explicitly
-  - Use stages (dev, prod) for versioning
+### 🚨 MUST-KNOW (taught now)
+- **SAM template is CloudFormation** — SAM compiles to CloudFormation, which creates all resources
+- **Lambda execution role** — Lambda needs IAM permissions to call other AWS services
+- **API Gateway proxy integration** — Lambda receives full HTTP request, must return `{statusCode, body, headers}`
 
-- [ ] **Real-world example**: Create HTTP API with POST /upload route → Lambda
+### Implementation Steps
+- [x] **Run `sam init`**
+  - Choose: Python 3.11, Hello World template
+  - Creates: `template.yaml`, `hello_world/app.py`, `requirements.txt`
 
-### 2.2 Implementation: HTTP API for File Upload
-- [ ] **Create API Gateway HTTP API**
-- [ ] **Create POST /upload route** → Lambda from Phase 1.3
-- [ ] **Test with curl/Postman**: Upload file via HTTP
+- [x] **Examine `template.yaml`**
+  - Defines: Lambda function, API Gateway, IAM role
+  - Understand: `Resources`, `Properties`, `Events`
 
----
+- [x] **Deploy with `sam deploy --guided`**
+  - Stack name: `file-sharing-dev`
+  - Region: (choose yours)
+  - Saves config to `samconfig.toml`
 
-## Phase 3: Metadata Storage - DynamoDB
+- [x] **Test the API**
+  - Get API endpoint from outputs
+  - `curl https://xxx.execute-api.region.amazonaws.com/hello`
+  - Should return: `{"message": "hello world"}`
 
-### 3.1 DynamoDB
-- [ ] **Teach DynamoDB mental model**
-  - What: NoSQL key-value/document database
-  - Why: Fast, scalable, serverless, pay-per-request
-  - When: High-throughput apps, flexible schemas, single-digit ms latency
+- [x] **View in AWS Console**
+  - CloudFormation → Stacks → file-sharing-dev
+  - Lambda → Functions
+  - API Gateway → APIs
 
-- [ ] **Essential DynamoDB operations (SDK + CLI)**
-  - Create table: `dynamodb.create_table()` / `aws dynamodb create-table`
-  - Put item: `dynamodb.put_item()` / `aws dynamodb put-item`
-  - Get item: `dynamodb.get_item()` / `aws dynamodb get-item`
-  - Query: `dynamodb.query()` / `aws dynamodb query`
-  - Scan: `dynamodb.scan()` / `aws dynamodb scan`
-  - Update item: `dynamodb.update_item()` / `aws dynamodb update-item`
-  - Delete item: `dynamodb.delete_item()` / `aws dynamodb delete-item`
-
-- [ ] **DynamoDB constraints & pitfalls**
-  - Primary key required (partition key + optional sort key)
-  - Item size limit: 400KB
-  - Scan is expensive (use Query with indexes)
-  - Choose partition key wisely (high cardinality for even distribution)
-  - Use GSI/LSI for additional query patterns
-
-- [ ] **Real-world example**: Create table, insert file metadata, query by user
-
-### 3.2 Implementation: File Metadata Storage
-- [ ] **Create DynamoDB table** `FileMetadata`:
-  - Partition key: `userId` (string)
-  - Sort key: `fileId` (string)
-  - Attributes: `fileName`, `s3Key`, `uploadedAt`, `size`, `sharedWith`
-
-- [ ] **Update Lambda** to:
-  - Generate unique `fileId`
-  - Store metadata in DynamoDB after S3 upload
-  - Return `fileId` to user
-
-- [ ] **Create GET /files Lambda** to list user's files from DynamoDB
-- [ ] **Create GET /files/{fileId} Lambda** to get file metadata
-- [ ] **Add routes to API Gateway**
+### Outcome
+✅ **Working API deployed with IaC** — you can destroy and recreate everything with `sam deploy`
 
 ---
 
-## Phase 4: Authentication - Cognito
+## Sprint 2: File Upload (S3 + Presigned URLs)
 
-### 4.1 Cognito
-- [ ] **Teach Cognito mental model**
-  - What: Managed user authentication & authorization
-  - Why: Handles signup/login/MFA without custom auth code
-  - When: Apps need user accounts, social login, or federation
+### Goals
+- Store files in S3
+- Generate presigned URLs for direct upload
+- Understand why presigned URLs matter
 
-- [ ] **Essential Cognito operations (SDK + CLI)**
-  - Create user pool: `cognito-idp.create_user_pool()` / `aws cognito-idp create-user-pool`
-  - Create user pool client: `cognito-idp.create_user_pool_client()`
-  - Sign up user: `cognito-idp.sign_up()` / `aws cognito-idp sign-up`
-  - Confirm signup: `cognito-idp.confirm_sign_up()`
-  - Login: `cognito-idp.initiate_auth()` / `aws cognito-idp initiate-auth`
-  - Get user: `cognito-idp.get_user()`
+### New Services
+- **S3**: Object storage for files
 
-- [ ] **Cognito constraints & pitfalls**
-  - User pools vs Identity pools (pools = auth, identity = AWS creds)
-  - Access tokens expire (default 1 hour, use refresh tokens)
-  - Email/phone verification required for production
-  - Password policy must meet security standards
-  - Use groups for role-based access
+### 🚨 MUST-KNOW (taught now)
+- **API Gateway 10MB payload limit** — cannot upload large files through API Gateway. Solution: presigned URLs
+- **Presigned URLs bypass Lambda** — client uploads directly to S3, Lambda just generates the URL
+- **S3 bucket names are globally unique** — use pattern `{org}-file-sharing-{env}-{random}`
+- **CORS required for browser uploads** — S3 must allow cross-origin requests from your domain
 
-- [ ] **Real-world example**: Create user pool, sign up user, get JWT token
+### Essential S3 Operations (Python SDK + CLI)
+```python
+# Generate presigned POST URL (for upload)
+s3_client.generate_presigned_post(
+    Bucket='my-bucket',
+    Key='uploads/file.jpg',
+    ExpiresIn=3600  # 1 hour
+)
 
-### 4.2 Implementation: Secure API with Cognito
-- [ ] **Create Cognito User Pool**
-- [ ] **Create User Pool Client** (for API)
-- [ ] **Configure API Gateway** with Cognito authorizer
-- [ ] **Update Lambda** to extract `userId` from Cognito JWT claims
-- [ ] **Test**: Sign up user, get token, call API with token
+# Generate presigned GET URL (for download)
+s3_client.generate_presigned_url(
+    'get_object',
+    Params={'Bucket': 'my-bucket', 'Key': 'file.jpg'},
+    ExpiresIn=3600
+)
+```
 
----
+CLI:
+```bash
+# Create bucket
+aws s3 mb s3://my-bucket
 
-## Phase 5: File Sharing & Advanced Features
+# Upload file
+aws s3 cp file.txt s3://my-bucket/
 
-### 5.1 Implementation: Presigned URLs for Direct Upload/Download
-- [ ] **Create POST /files/upload-url Lambda**:
+# List objects
+aws s3 ls s3://my-bucket/
+
+# Download file
+aws s3 cp s3://my-bucket/file.txt .
+```
+
+### Implementation Steps
+- [x] **Add S3 bucket to `template.yaml`**
+  ```yaml
+  FileStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-files-${AWS::AccountId}'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins: ['*']
+            AllowedMethods: [GET, PUT, POST]
+            AllowedHeaders: ['*']
+  ```
+
+- [x] **Create Lambda: `POST /files/upload-url`**
+  - Input: `{ "fileName": "photo.jpg" }`
   - Generate presigned POST URL for S3
-  - Return URL to client
-  - Client uploads directly to S3 (bypasses API Gateway 10MB limit)
+  - Return: `{ "uploadUrl": "https://...", "fields": {...} }`
 
-- [ ] **Create GET /files/{fileId}/download-url Lambda**:
-  - Check if user owns file or has access
-  - Generate presigned GET URL
-  - Return URL to client
+- [x] **Update Lambda IAM role** to allow `s3:PutObject`
 
-### 5.2 Implementation: File Sharing
-- [ ] **Create POST /files/{fileId}/share Lambda**:
-  - Update DynamoDB `sharedWith` attribute
-  - Add target user to permissions
+- [x] **Deploy with `sam build && sam deploy`**
 
-- [ ] **Update GET /files Lambda**:
-  - Return files owned by user + files shared with user
+- [x] **Test presigned URL**
+  - Call API to get presigned URL
+  - Upload file using `curl` or browser
+  - Verify file in S3: `aws s3 ls s3://bucket-name/`
 
-### 5.3 Implementation: File Deletion
-- [ ] **Create DELETE /files/{fileId} Lambda**:
-  - Delete from S3
-  - Delete from DynamoDB
+### Real-World Extras
+- [x] **Enable S3 versioning** (production best practice)
+  ```yaml
+  VersioningConfiguration:
+    Status: Enabled
+  ```
+
+- [x] **Enable S3 encryption** (SSE-S3)
+  ```yaml
+  BucketEncryption:
+    ServerSideEncryptionConfiguration:
+      - ServerSideEncryptionByDefault:
+          SSEAlgorithm: AES256
+  ```
+
+- [x] **Block public access** (security)
+  ```yaml
+  PublicAccessBlockConfiguration:
+    BlockPublicAcls: true
+    BlockPublicPolicy: true
+    IgnorePublicAcls: true
+    RestrictPublicBuckets: true
+  ```
+
+### Outcome
+✅ **Users can upload files to S3 via presigned URLs**
+
+---
+
+## Sprint 3: File Metadata Storage (DynamoDB)
+
+### Goals
+- Store file metadata (name, owner, upload date, size)
+- List user's files
+- Learn DynamoDB table design
+
+### New Services
+- **DynamoDB**: NoSQL database for metadata
+
+### 🚨 MUST-KNOW (taught now)
+- **Partition key choice is CRITICAL** — poor choice causes hot partitions, throttling. Use high-cardinality keys (userId, not status)
+- **Query vs Scan** — Query reads one partition (fast). Scan reads entire table (slow, expensive, avoid!)
+- **DynamoDB is not SQL** — no joins, no schema migrations, denormalize data
+- **On-demand vs Provisioned** — on-demand auto-scales (pay per request), provisioned is cheaper at high volume but can throttle
+
+### Essential DynamoDB Operations (Python SDK + CLI)
+```python
+# Put item
+dynamodb.put_item(
+    TableName='FileMetadata',
+    Item={
+        'userId': {'S': 'user123'},
+        'fileId': {'S': 'abc-def-ghi'},
+        'fileName': {'S': 'photo.jpg'},
+        'size': {'N': '1024000'},
+        'uploadedAt': {'S': '2025-11-23T12:00:00Z'}
+    }
+)
+
+# Query by userId (efficient)
+dynamodb.query(
+    TableName='FileMetadata',
+    KeyConditionExpression='userId = :uid',
+    ExpressionAttributeValues={':uid': {'S': 'user123'}}
+)
+
+# Get single item
+dynamodb.get_item(
+    TableName='FileMetadata',
+    Key={'userId': {'S': 'user123'}, 'fileId': {'S': 'abc-def-ghi'}}
+)
+
+# Update item
+dynamodb.update_item(
+    TableName='FileMetadata',
+    Key={'userId': {'S': 'user123'}, 'fileId': {'S': 'abc-def-ghi'}},
+    UpdateExpression='SET sharedWith = :shared',
+    ExpressionAttributeValues={':shared': {'L': [{'S': 'user456'}]}}
+)
+```
+
+CLI:
+```bash
+# Query by userId
+aws dynamodb query \
+  --table-name FileMetadata \
+  --key-condition-expression 'userId = :uid' \
+  --expression-attribute-values '{":uid":{"S":"user123"}}'
+
+# Get item
+aws dynamodb get-item \
+  --table-name FileMetadata \
+  --key '{"userId":{"S":"user123"},"fileId":{"S":"abc-def-ghi"}}'
+```
+
+### Implementation Steps
+- [ ] **Add DynamoDB table to `template.yaml`**
+  ```yaml
+  FileMetadataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${AWS::StackName}-file-metadata'
+      BillingMode: PAY_PER_REQUEST  # on-demand
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: fileId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH    # partition key
+        - AttributeName: fileId
+          KeyType: RANGE   # sort key
+  ```
+
+- [ ] **Update `POST /files/upload-url` Lambda**
+  - After generating presigned URL, store metadata in DynamoDB
+  - Generate `fileId` with `uuid.uuid4()`
+  - Store: userId (hardcoded "demo-user" for now), fileId, fileName, s3Key, uploadedAt
+
+- [ ] **Create Lambda: `GET /files`**
+  - Query DynamoDB by userId
+  - Return list of files with metadata
+
+- [ ] **Create Lambda: `GET /files/{fileId}`**
+  - Get item from DynamoDB
+  - Return file metadata
+
+- [ ] **Update Lambda IAM role** to allow `dynamodb:PutItem`, `dynamodb:Query`, `dynamodb:GetItem`
+
+- [ ] **Deploy with `sam build && sam deploy`**
+
+- [ ] **Test**
+  - Upload file via presigned URL
+  - Call `GET /files` → should return uploaded file metadata
+  - Call `GET /files/{fileId}` → should return single file metadata
+
+### Real-World Extras
+- [ ] **Add TTL for temporary files** (auto-delete after N days)
+  ```yaml
+  TimeToLiveSpecification:
+    AttributeName: expiresAt
+    Enabled: true
+  ```
+  - In Lambda, set `expiresAt` to Unix timestamp (e.g., +30 days)
+
+- [ ] **Add pagination** for `GET /files`
+  - Use `LastEvaluatedKey` from DynamoDB response
+  - Return to client for next page request
+
+- [ ] **Enable DynamoDB Streams** (for audit log, future use)
+  ```yaml
+  StreamSpecification:
+    StreamViewType: NEW_AND_OLD_IMAGES
+  ```
+
+### Outcome
+✅ **Files tracked in DynamoDB, users can list their files**
+
+---
+
+## Sprint 4: User Authentication (Cognito)
+
+### Goals
+- Add user signup/login
+- Secure API with JWT tokens
+- Extract userId from token
+
+### New Services
+- **Cognito User Pool**: User directory and authentication
+- **API Gateway Authorizer**: JWT validation
+
+### 🚨 MUST-KNOW (taught now)
+- **User Pools vs Identity Pools** — **MOST CRITICAL DISTINCTION!**
+  - **User Pool**: Signup/login → JWT tokens (ID, access, refresh). Use for: backend APIs
+  - **Identity Pool**: Exchange JWT → AWS credentials. Use for: direct S3/DynamoDB access from browser
+  - For this project: **User Pool only** (API Gateway validates JWT)
+- **Three token types**:
+  - **ID token**: User info (email, name). Use for: display in UI
+  - **Access token**: Authorization. Use for: API Gateway authorizer (this is what we'll use!)
+  - **Refresh token**: Get new tokens without re-login (30 days default)
+- **JWT tokens are stateless** — cannot revoke until expiry. For immediate revocation, use `admin_user_global_sign_out()`
+- **Password policy** — min 8 chars, uppercase, lowercase, numbers, symbols (configurable)
+
+### Essential Cognito Operations (SDK + CLI)
+```python
+# Sign up user
+cognito.sign_up(
+    ClientId='client-id',
+    Username='user@example.com',
+    Password='Password123!',
+    UserAttributes=[{'Name': 'email', 'Value': 'user@example.com'}]
+)
+
+# Confirm signup (with code from email)
+cognito.confirm_sign_up(
+    ClientId='client-id',
+    Username='user@example.com',
+    ConfirmationCode='123456'
+)
+
+# Admin confirm (skip email, for testing)
+cognito.admin_confirm_sign_up(
+    UserPoolId='us-east-1_xxx',
+    Username='user@example.com'
+)
+
+# Login (get tokens)
+cognito.initiate_auth(
+    ClientId='client-id',
+    AuthFlow='USER_PASSWORD_AUTH',
+    AuthParameters={
+        'USERNAME': 'user@example.com',
+        'PASSWORD': 'Password123!'
+    }
+)
+# Returns: IdToken, AccessToken, RefreshToken
+
+# Get user info (from access token)
+cognito.get_user(AccessToken='access-token')
+```
+
+CLI:
+```bash
+# Sign up
+aws cognito-idp sign-up \
+  --client-id xxx \
+  --username user@example.com \
+  --password Password123! \
+  --user-attributes Name=email,Value=user@example.com
+
+# Confirm signup
+aws cognito-idp confirm-sign-up \
+  --client-id xxx \
+  --username user@example.com \
+  --confirmation-code 123456
+
+# Login
+aws cognito-idp initiate-auth \
+  --client-id xxx \
+  --auth-flow USER_PASSWORD_AUTH \
+  --auth-parameters USERNAME=user@example.com,PASSWORD=Password123!
+```
+
+### Implementation Steps
+- [ ] **Add Cognito User Pool to `template.yaml`**
+  ```yaml
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${AWS::StackName}-users'
+      AutoVerifiedAttributes: [email]
+      UsernameAttributes: [email]  # login with email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub '${AWS::StackName}-client'
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      GenerateSecret: false  # for browser/mobile apps
+  ```
+
+- [ ] **Add Cognito Authorizer to API Gateway**
+  ```yaml
+  # In API Gateway definition
+  Auth:
+    Authorizers:
+      CognitoAuthorizer:
+        UserPoolArn: !GetAtt UserPool.Arn
+  ```
+
+- [ ] **Update all API routes to require auth**
+  ```yaml
+  # On each function's API event
+  Auth:
+    Authorizer: CognitoAuthorizer
+  ```
+
+- [ ] **Update Lambda functions to extract userId**
+  ```python
+  # Lambda receives userId in event
+  user_id = event['requestContext']['authorizer']['claims']['sub']
+  # 'sub' is the unique user ID from Cognito
+  ```
+
+- [ ] **Create test user**
+  - Use CLI to sign up and confirm user
+  - Get access token
+
+- [ ] **Deploy with `sam build && sam deploy`**
+
+- [ ] **Test authentication**
+  - Call `GET /files` without token → 401 Unauthorized
+  - Call `GET /files` with token → 200 OK, returns files for authenticated user
+
+### Real-World Extras
+- [ ] **Add Cognito Groups for RBAC** (Admin, User)
+  ```yaml
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admins
+      UserPoolId: !Ref UserPool
+  ```
+
+- [ ] **Enable MFA (optional)** for extra security
+  ```yaml
+  MfaConfiguration: OPTIONAL  # or REQUIRED
+  EnabledMfas: [SOFTWARE_TOKEN_MFA]  # TOTP (Google Authenticator)
+  ```
+
+- [ ] **Add Lambda trigger** for post-signup (send welcome email, create user record)
+  ```yaml
+  LambdaConfig:
+    PostConfirmation: !GetAtt WelcomeUserFunction.Arn
+  ```
+
+### Outcome
+✅ **API secured with Cognito, users can signup/login, all operations are user-specific**
+
+---
+
+## Sprint 5: File Download & Sharing
+
+### Goals
+- Generate presigned URLs for download
+- Share files with other users
+- Implement permission checks
+
+### New Concepts
+- DynamoDB conditional writes
+- Permission checking in Lambda
+
+### Implementation Steps
+- [ ] **Create Lambda: `GET /files/{fileId}/download-url`**
+  - Get file metadata from DynamoDB
+  - Check permissions: is user the owner OR in `sharedWith` list?
+  - If authorized: generate presigned GET URL for S3
+  - Return: `{ "downloadUrl": "https://..." }`
+
+- [ ] **Create Lambda: `POST /files/{fileId}/share`**
+  - Input: `{ "shareWithUserId": "user456" }`
+  - Update DynamoDB: add user to `sharedWith` list
+  - Use `UpdateExpression: 'ADD sharedWith :user'`
+
+- [ ] **Update `GET /files` to include shared files**
+  - Query owned files: `userId = :uid`
+  - Add GSI (Global Secondary Index) for shared files (later optimization)
+  - For now: scan with filter (not optimal, but works for learning)
+
+- [ ] **Deploy and test**
+  - User A uploads file
+  - User A shares with User B
+  - User B can download file
+  - User C cannot download file → 403 Forbidden
+
+### Real-World Extras
+- [ ] **Add GSI for efficient shared file queries**
+  ```yaml
+  GlobalSecondaryIndexes:
+    - IndexName: SharedWithIndex
+      KeySchema:
+        - AttributeName: sharedWith
+          KeyType: HASH
+      Projection:
+        ProjectionType: ALL
+  ```
+
+- [ ] **Add file deletion: `DELETE /files/{fileId}`**
+  - Delete from S3: `s3.delete_object()`
+  - Delete from DynamoDB: `dynamodb.delete_item()`
   - Check ownership before deletion
 
----
-
-## Phase 6: Infrastructure as Code
-
-### 6.1 CloudFormation
-- [ ] **Teach CloudFormation mental model**
-  - What: Declarative infrastructure templates (JSON/YAML)
-  - Why: Version control infra, reproducible deployments, rollback
-  - When: Any AWS infrastructure that needs to be repeatable
-
-- [ ] **Essential CloudFormation operations (SDK + CLI)**
-  - Create stack: `cloudformation.create_stack()` / `aws cloudformation create-stack`
-  - Update stack: `cloudformation.update_stack()` / `aws cloudformation update-stack`
-  - Delete stack: `cloudformation.delete_stack()` / `aws cloudformation delete-stack`
-  - Describe stack: `cloudformation.describe_stacks()`
-
-- [ ] **CloudFormation constraints & pitfalls**
-  - Stack creation can fail mid-way (auto rollback by default)
-  - Update conflicts if manual changes made
-  - Use change sets to preview updates
-  - Nested stacks for large templates
-
-### 6.2 SAM (Serverless Application Model)
-- [ ] **Teach SAM mental model**
-  - What: CloudFormation extension for serverless apps
-  - Why: Simpler syntax for Lambda/API Gateway/DynamoDB
-  - When: Building serverless applications
-
-- [ ] **Essential SAM operations (CLI)**
-  - Init project: `sam init`
-  - Build: `sam build`
-  - Local test: `sam local invoke`
-  - Deploy: `sam deploy --guided`
-
-- [ ] **SAM constraints & pitfalls**
-  - Still uses CloudFormation under the hood
-  - `sam build` packages dependencies
-  - Use `samconfig.toml` for deployment config
-
-### 6.3 CDK (Cloud Development Kit)
-- [ ] **Teach CDK mental model**
-  - What: Define infrastructure in Python/TypeScript/Java/C#
-  - Why: Use programming constructs (loops, conditionals) vs YAML
-  - When: Complex infrastructure, need type safety, prefer code over config
-
-- [ ] **Essential CDK operations (CLI)**
-  - Init project: `cdk init app --language python`
-  - Synth template: `cdk synth`
-  - Deploy: `cdk deploy`
-  - Diff: `cdk diff`
-  - Destroy: `cdk destroy`
-
-- [ ] **CDK constraints & pitfalls**
-  - Compiles to CloudFormation (inherits CF limits)
-  - State stored in CloudFormation stacks
-  - Use L2/L3 constructs (not L1) for convenience
-
-### 6.4 Implementation: Deploy with IaC
-- [ ] **Choose one IaC tool** (SAM recommended for serverless)
-- [ ] **Define entire stack**:
-  - S3 bucket
-  - DynamoDB table
-  - Lambda functions
-  - API Gateway
-  - Cognito User Pool
-  - IAM roles/policies
-
-- [ ] **Deploy stack** via `sam deploy` or `cdk deploy`
-- [ ] **Test end-to-end**: signup → login → upload → list → share → download → delete
+### Outcome
+✅ **Users can download and share files with permission checks**
 
 ---
 
-## Phase 7: Production Readiness
+## Sprint 6: Background Processing (SQS + S3 Events)
 
-### 7.1 Observability - CloudWatch
-- [ ] **Teach CloudWatch mental model**
-  - What: Monitoring, logging, metrics, alarms
-  - Why: Troubleshoot errors, track performance, alert on issues
-  - When: Any production application
+### Goals
+- Trigger Lambda on S3 upload
+- Process files asynchronously (e.g., generate thumbnail)
+- Learn event-driven architecture
 
-- [ ] **Essential CloudWatch operations (SDK + CLI)**
-  - View logs: `logs.filter_log_events()` / `aws logs tail`
-  - Create alarm: `cloudwatch.put_metric_alarm()` / `aws cloudwatch put-metric-alarm`
-  - Put custom metric: `cloudwatch.put_metric_data()`
+### New Services
+- **S3 Events**: Trigger on upload/delete
+- **SQS**: Message queue for async processing
+- **SNS**: Notifications
 
-- [ ] **Add CloudWatch features**:
-  - Lambda log groups (auto-created)
-  - Custom metrics (upload count, file size)
-  - Alarms (error rate > 5%)
-  - Dashboard for monitoring
+### 🚨 MUST-KNOW (taught now)
+- **S3 events are asynchronous** — Lambda invoked after upload completes
+- **SQS visibility timeout** — message invisible for N seconds after receive. If not deleted, becomes visible again (default 30s)
+- **At-least-once delivery** — message may be delivered multiple times. Make processing **idempotent**!
+- **FIFO vs Standard queues** — FIFO: exactly-once, ordered, 300 msg/s. Standard: unlimited throughput, best-effort ordering
 
-### 7.2 Security Hardening
-- [ ] **S3 bucket policies**: Block public access, enforce encryption
-- [ ] **IAM least privilege**: Lambda execution role with minimal permissions
-- [ ] **API Gateway throttling**: Set rate limits
-- [ ] **Input validation**: Validate file types, sizes in Lambda
-- [ ] **CORS configuration**: Restrict origins
+### Implementation Steps
+- [ ] **Add SQS queue to `template.yaml`**
+  ```yaml
+  FileProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${AWS::StackName}-file-processing'
+      VisibilityTimeout: 300  # 5 minutes
+  ```
 
-### 7.3 Cost Optimization
-- [ ] **S3 lifecycle policies**: Move old files to Glacier
-- [ ] **DynamoDB on-demand**: Use on-demand pricing for variable workloads
-- [ ] **Lambda memory tuning**: Right-size memory for cost/performance
-- [ ] **API Gateway caching**: Cache GET requests
+- [ ] **Add S3 event notification → SQS**
+  ```yaml
+  # In S3 bucket
+  NotificationConfiguration:
+    QueueConfigurations:
+      - Event: s3:ObjectCreated:*
+        Queue: !GetAtt FileProcessingQueue.Arn
+        Filter:
+          S3Key:
+            Rules:
+              - Name: prefix
+                Value: uploads/
+  ```
+
+- [ ] **Create Lambda: process files from SQS**
+  - Triggered by SQS messages
+  - Download file from S3
+  - Process (e.g., generate thumbnail, scan for viruses)
+  - Upload result to S3
+  - Delete message from queue (automatic with Lambda SQS integration)
+
+- [ ] **Test**
+  - Upload file to S3
+  - S3 → SQS → Lambda automatically triggered
+  - Check CloudWatch Logs for Lambda execution
+
+### Real-World Extras
+- [ ] **Add Dead Letter Queue** for failed processing
+  ```yaml
+  RedrivePolicy:
+    deadLetterTargetArn: !GetAtt DLQ.Arn
+    maxReceiveCount: 3  # retry 3 times before DLQ
+  ```
+
+- [ ] **Add SNS for notifications** (email when processing done)
+  ```yaml
+  ProcessingTopic:
+    Type: AWS::SNS::Topic
+  ```
+
+### Outcome
+✅ **Event-driven async processing with S3 → SQS → Lambda**
+
+---
+
+## Sprint 7: Observability & Production Hardening
+
+### Goals
+- Add CloudWatch alarms
+- Enable X-Ray tracing
+- Structured logging
+- Security review
+
+### New Services
+- **CloudWatch**: Metrics, logs, alarms
+- **X-Ray**: Distributed tracing
+
+### Implementation Steps
+- [ ] **Add structured logging to all Lambdas**
+  ```python
+  import json
+  import logging
+  logger = logging.getLogger()
+  logger.setLevel(logging.INFO)
+
+  logger.info(json.dumps({
+      'event': 'file_uploaded',
+      'userId': user_id,
+      'fileId': file_id,
+      'fileName': file_name
+  }))
+  ```
+
+- [ ] **Enable X-Ray tracing**
+  ```yaml
+  # In Lambda function
+  Tracing: Active
+  ```
+
+- [ ] **Add CloudWatch alarms**
+  ```yaml
+  ApiErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-api-errors'
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+  ```
+
+- [ ] **Security hardening checklist**
+  - ✅ S3 bucket: public access blocked
+  - ✅ S3 bucket: encryption enabled
+  - ✅ DynamoDB: encryption at rest
+  - ✅ Lambda: least privilege IAM roles
+  - ✅ API Gateway: CORS configured restrictively
+  - ✅ Cognito: strong password policy
+  - ✅ All secrets in Secrets Manager/Parameter Store
+
+- [ ] **Cost optimization**
+  - [ ] S3 lifecycle policy: move old files to Glacier after 30 days
+  - [ ] Lambda memory optimization: test with different memory sizes
+  - [ ] DynamoDB: on-demand pricing (already set)
+
+### Outcome
+✅ **Production-ready observability and security**
+
+---
+
+## 🎓 What You'll Know After Completing This Project
+
+### Core AWS Services (Deep, Hands-On)
+
+**SAM (Serverless Application Model)**
+- ✅ Define entire serverless apps as code
+- ✅ Deploy with `sam build && sam deploy`
+- ✅ Understand SAM → CloudFormation compilation
+- ✅ Use `sam local invoke` for local testing
+
+**Lambda**
+- ✅ Create serverless functions in Python
+- ✅ Configure IAM execution roles (least privilege)
+- ✅ Handle API Gateway proxy integration
+- ✅ Use environment variables for configuration
+- ✅ Understand cold starts and optimization
+
+**API Gateway**
+- ✅ Create HTTP APIs with Lambda integration
+- ✅ Configure Cognito JWT authorizers
+- ✅ Set up CORS for browser clients
+- ✅ Understand 10MB payload and 29s timeout limits
+
+**S3**
+- ✅ Generate presigned URLs for direct upload/download
+- ✅ Configure CORS, versioning, encryption
+- ✅ Set up S3 event notifications
+- ✅ Understand why presigned URLs bypass Lambda
+
+**DynamoDB**
+- ✅ Design tables with partition/sort keys
+- ✅ Query efficiently (avoid Scan!)
+- ✅ Use GSI for additional query patterns
+- ✅ Implement pagination with LastEvaluatedKey
+- ✅ Choose on-demand vs provisioned capacity
+
+**Cognito**
+- ✅ Create user pools for authentication
+- ✅ Implement signup/login flows
+- ✅ Understand ID vs Access vs Refresh tokens
+- ✅ Integrate with API Gateway authorizers
+- ✅ Extract user claims from JWT in Lambda
+
+**SQS + S3 Events**
+- ✅ Build event-driven architectures
+- ✅ Process files asynchronously
+- ✅ Handle at-least-once delivery (idempotency)
+
+**CloudWatch + X-Ray**
+- ✅ View Lambda logs
+- ✅ Create alarms for errors and latency
+- ✅ Enable distributed tracing
+
+### Production Skills
+
+**Infrastructure as Code**
+- ✅ Use IaC from day 1 (not at the end!)
+- ✅ Version control infrastructure
+- ✅ Reproducible deployments
+- ✅ Destroy and recreate entire stack safely
+
+**Security**
+- ✅ Least privilege IAM policies
+- ✅ Encryption at rest (S3, DynamoDB)
+- ✅ JWT authentication and authorization
+- ✅ Input validation and permission checks
+
+**Real-World Architecture**
+- ✅ Feature-driven development
+- ✅ Iterative deployment (ship after each sprint)
+- ✅ Event-driven async processing
+- ✅ Observability from the start
+
+### Career-Ready
+
+After this project, you can:
+- ✅ **Build serverless apps** from scratch with IaC
+- ✅ **Explain design decisions** (why presigned URLs, why DynamoDB over RDS, etc.)
+- ✅ **Deploy to production** confidently with monitoring and security
+- ✅ **Join AWS projects** immediately with practical experience
+
+You'll have **real engineering experience**, not tutorial knowledge.
 
 ---
 
 ## Session State
 
-**Last Updated**: 2025-11-23
-**Current Phase**: Phase 0 - Planning Complete
-**Next Teaching Step**: Phase 1.1 - Teach S3 mental model
+**Last Updated**: 2025-11-25
+**Current Sprint**: Sprint 3 - File Metadata Storage (DynamoDB)
+**Next Step**: Add DynamoDB table to template.yaml
 
-**Progress Summary**:
-- Total checkboxes: 60+
-- Completed: 0
-- Remaining: 60+
+**Progress**:
+- Sprints: 8 (0-7)
+- Completed: 3 (Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅)
+- Current: Sprint 3
+- Sprint 2 completed: 5/5 main tasks + 3/3 production extras
+- Sprint 3 tasks completed: 0/7
 
 ---
 
-## Teaching Notes (for Claude)
+## Teaching Instructions (for Claude)
 
-**When resuming a session**:
-1. Read this file to see current progress
-2. Find the first unchecked checkbox
-3. Teach that topic using the format:
-   - Mental model (1-2 sentences)
-   - Essential SDK + CLI commands
-   - Constraints & pitfalls
-   - Real-world example
-4. Check the box when teaching complete
-5. If implementation step, guide user through code
-6. Update "Session State" section
-7. Ask user if ready to continue to next checkbox
+**🔄 When resuming a session**:
+1. **Read "Session State"** to identify current sprint and next unchecked item
+2. **Locate next checkbox** in current sprint
+3. **Teach the concept/step**:
+   - Start with mental model (1-2 sentences: what it is, why it exists)
+   - Show essential Python SDK calls
+   - Show equivalent AWS CLI commands
+   - Teach MUST-KNOWs just-in-time (when user encounters the need)
+   - Provide real-world example from this project
+4. **Guide user through implementation**:
+   - Don't just list steps — walk through them interactively
+   - Answer questions as they arise
+   - Check for understanding
+5. **Verify user's work**:
+   - Use `aws ... --profile claude` to check their deployed resources
+   - Review their code if they share it
+6. **Check the box** when user completes the task
+7. **Update "Session State"** with progress
+8. **Move to next sprint** when all sprint checkboxes complete
 
-**Teaching style**:
-- Short, direct explanations
-- Always show both Python SDK and AWS CLI
-- Emphasize production pitfalls
+**📚 Teaching style** (from CLAUDE.md):
+- Short, direct explanations (no essays)
+- Always show both Python SDK + AWS CLI
+- Teach MUST-KNOWs when relevant, not upfront
 - Use real examples from this project
 - No fluff or theory
 - Let user drive pace (don't auto-advance unless asked)
+
+**🎯 Sprint workflow**:
+- Guide user to build one feature per sprint
+- Teach services together in context (not in isolation)
+- Have user deploy and test after each sprint
+- Emphasize: checkboxes track feature completion, not service mastery (services will be used in multiple sprints)
+
+**⚠️ Important reminders**:
+- User has admin access (default profile) to build
+- Claude has read-only access (`--profile claude`) to verify
+- This file is Claude's script — guide the user, don't just point them to the file
 
 **File references**:
 - AWS docs: `aws-pdfs/` folder
 - SDK examples: `aws-doc-sdk-examples/`
 - CLI examples: `/opt/homebrew/share/awscli/examples/{service}/`
-- AWS CLI profile: `--profile claude` (read-only access)
+
+**AWS Access**:
+- User has admin access (default profile) to build and deploy
+- Claude has read-only access (`--profile claude`) to check user's work
+- All CLI examples in this plan are for the user (no `--profile` flag needed)
