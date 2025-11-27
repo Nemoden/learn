@@ -286,7 +286,7 @@ aws dynamodb get-item \
 ```
 
 ### Implementation Steps
-- [ ] **Add DynamoDB table to `template.yaml`**
+- [x] **Add DynamoDB table to `template.yaml`**
   ```yaml
   FileMetadataTable:
     Type: AWS::DynamoDB::Table
@@ -305,20 +305,27 @@ aws dynamodb get-item \
           KeyType: RANGE   # sort key
   ```
 
-- [ ] **Update `POST /files/upload-url` Lambda**
+- [x] **Update `POST /files/upload-url` Lambda**
   - After generating presigned URL, store metadata in DynamoDB
   - Generate `fileId` with `uuid.uuid4()`
   - Store: userId (hardcoded "demo-user" for now), fileId, fileName, s3Key, uploadedAt
 
-- [ ] **Create Lambda: `GET /files`**
+- [x] **Update Lambda IAM role** to allow `dynamodb:PutItem`, `dynamodb:Query`, `dynamodb:GetItem`
+
+- [x] **Deploy with `sam build && sam deploy`**
+
+- [x] **Test presigned URL**
+  - Call API to get presigned URL
+  - Upload file using `curl` or browser
+  - Verify file in S3: `aws s3 ls s3://bucket-name/`
+
+- [x] **Create Lambda: `GET /files`**
   - Query DynamoDB by userId
   - Return list of files with metadata
 
 - [ ] **Create Lambda: `GET /files/{fileId}`**
   - Get item from DynamoDB
   - Return file metadata
-
-- [ ] **Update Lambda IAM role** to allow `dynamodb:PutItem`, `dynamodb:Query`, `dynamodb:GetItem`
 
 - [ ] **Deploy with `sam build && sam deploy`**
 
@@ -806,16 +813,16 @@ You'll have **real engineering experience**, not tutorial knowledge.
 
 ## Session State
 
-**Last Updated**: 2025-11-25
+**Last Updated**: 2025-11-27
 **Current Sprint**: Sprint 3 - File Metadata Storage (DynamoDB)
-**Next Step**: Add DynamoDB table to template.yaml
+**Next Step**: Create Lambda: `GET /files/{fileId}` to get single file metadata
 
 **Progress**:
 - Sprints: 8 (0-7)
 - Completed: 3 (Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅)
 - Current: Sprint 3
 - Sprint 2 completed: 5/5 main tasks + 3/3 production extras
-- Sprint 3 tasks completed: 0/7
+- Sprint 3 tasks completed: 5/7
 
 ---
 

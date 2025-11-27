@@ -31,6 +31,21 @@ Resources:
           - AllowedMethods: ['GET', 'PUT', 'POST']
             AllowedOrigins: ['*']
             AllowedHeaders: ['*']
+  FileMetadataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-file-metadata"
+      BillingMode: 'PAY_PER_REQUEST'
+      AttributeDefinitions:
+        - AttributeName: 'fileId'
+          AttributeType: 'S'
+        - AttributeName: 'userId'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'userId'
+          KeyType: 'HASH'
+        - AttributeName: 'fileId'
+          KeyType: 'RANGE'
   UploadUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -42,15 +57,38 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !Ref FileStorageBucket
+          FILES_TABLE: !Ref FileMetadataTable
       Policies:
         - S3WritePolicy:
             BucketName: !Ref FileStorageBucket
+        - DynamoDBWritePolicy:
+            TableName: !Ref FileMetadataTable
       Events:
         UploadFile:
           Type: Api
           Properties:
             Path: /files/upload-url
             Method: POST
+  ListFilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: list_files/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          FILES_TABLE: !Ref FileMetadataTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref FileMetadataTable
+      Events:
+        ListFiles:
+          Type: Api
+          Properties:
+            Path: /files
+            Method: GET
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -79,3 +117,21 @@ Outputs:
   HelloWorldFunctionIamRole:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt HelloWorldFunctionRole.Arn
+  ApiEndpoint:
+    Description: "API Gateway base URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  S3BucketName:
+    Description: "S3 bucket for files"
+    Value: !Ref FileStorageBucket
+  DynamoDBTableName:
+    Description: "DynamoDB table for metadata"
+    Value: !Ref FileMetadataTable
+  ListFilesdApi:
+    Description: "API Gateway endpoint URL for Prod stage for List Files function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/files"
+  ListFilesFunction:
+    Description: "List Files Function ARN"
+    Value: !GetAtt ListFilesFunction.Arn
+  ListFilesFunctionIamRole:
+    Description: "Implicit IAM Role created for List Files function"
+    Value: !GetAtt ListFilesFunctionRole.Arn
