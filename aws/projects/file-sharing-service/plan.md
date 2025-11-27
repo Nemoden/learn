@@ -323,13 +323,13 @@ aws dynamodb get-item \
   - Query DynamoDB by userId
   - Return list of files with metadata
 
-- [ ] **Create Lambda: `GET /files/{fileId}`**
+- [x] **Create Lambda: `GET /files/{fileId}`**
   - Get item from DynamoDB
   - Return file metadata
 
-- [ ] **Deploy with `sam build && sam deploy`**
+- [x] **Deploy with `sam build && sam deploy`**
 
-- [ ] **Test**
+- [x] **Test**
   - Upload file via presigned URL
   - Call `GET /files` → should return uploaded file metadata
   - Call `GET /files/{fileId}` → should return single file metadata
@@ -815,14 +815,13 @@ You'll have **real engineering experience**, not tutorial knowledge.
 
 **Last Updated**: 2025-11-27
 **Current Sprint**: Sprint 3 - File Metadata Storage (DynamoDB)
-**Next Step**: Create Lambda: `GET /files/{fileId}` to get single file metadata
+**Next Step**: Optional Real-World Extras (TTL, pagination, DynamoDB Streams) or continue to Sprint 4 (Cognito Authentication)
 
 **Progress**:
 - Sprints: 8 (0-7)
 - Completed: 3 (Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅)
-- Current: Sprint 3
-- Sprint 2 completed: 5/5 main tasks + 3/3 production extras
-- Sprint 3 tasks completed: 5/7
+- Current: Sprint 3 (7/7 main tasks complete ✅, 0/3 optional extras)
+- Sprint 3 completed: 7/7 main tasks ✅
 
 ---
 

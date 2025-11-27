@@ -1,1 +1,2 @@
 - [2025-11-25] AWS::S3Vectors - Vector embeddings storage on S3 for AI/ML applications (semantic search, RAG, similarity matching)
+- [2025-11-27] SQS and Step Functions for orchestrating serverless workflows - learn to decouple Lambda functions using SQS queues for asynchronous processing and Step Functions for complex multi-step workflows with error handling and retries

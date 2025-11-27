@@ -89,6 +89,26 @@ Resources:
           Properties:
             Path: /files
             Method: GET
+  GetFileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_file/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          FILES_TABLE: !Ref FileMetadataTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref FileMetadataTable
+      Events:
+        GetFile:
+          Type: Api
+          Properties:
+            Path: /files/{fileId}
+            Method: GET
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -135,3 +155,12 @@ Outputs:
   ListFilesFunctionIamRole:
     Description: "Implicit IAM Role created for List Files function"
     Value: !GetAtt ListFilesFunctionRole.Arn
+  GetFiledApi:
+    Description: "API Gateway endpoint URL for Prod stage for Get File function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/files/{fileId}"
+  GetFileFunction:
+    Description: "Get File Function ARN"
+    Value: !GetAtt GetFileFunction.Arn
+  GetFileFunctionIamRole:
+    Description: "Implicit IAM Role created for Get File function"
+    Value: !GetAtt GetFileFunctionRole.Arn
