@@ -442,7 +442,7 @@ aws cognito-idp initiate-auth \
 ```
 
 ### Implementation Steps
-- [ ] **Add Cognito User Pool to `template.yaml`**
+- [x] **Add Cognito User Pool to `template.yaml`**
   ```yaml
   UserPool:
     Type: AWS::Cognito::UserPool
@@ -469,7 +469,7 @@ aws cognito-idp initiate-auth \
       GenerateSecret: false  # for browser/mobile apps
   ```
 
-- [ ] **Add Cognito Authorizer to API Gateway**
+- [x] **Add Cognito Authorizer to API Gateway**
   ```yaml
   # In API Gateway definition
   Auth:
@@ -478,27 +478,27 @@ aws cognito-idp initiate-auth \
         UserPoolArn: !GetAtt UserPool.Arn
   ```
 
-- [ ] **Update all API routes to require auth**
+- [x] **Update all API routes to require auth**
   ```yaml
   # On each function's API event
   Auth:
     Authorizer: CognitoAuthorizer
   ```
 
-- [ ] **Update Lambda functions to extract userId**
+- [x] **Update Lambda functions to extract userId**
   ```python
   # Lambda receives userId in event
   user_id = event['requestContext']['authorizer']['claims']['sub']
   # 'sub' is the unique user ID from Cognito
   ```
 
-- [ ] **Create test user**
+- [x] **Create test user**
   - Use CLI to sign up and confirm user
   - Get access token
 
-- [ ] **Deploy with `sam build && sam deploy`**
+- [x] **Deploy with `sam build && sam deploy`**
 
-- [ ] **Test authentication**
+- [x] **Test authentication**
   - Call `GET /files` without token → 401 Unauthorized
   - Call `GET /files` with token → 200 OK, returns files for authenticated user
 
@@ -813,15 +813,15 @@ You'll have **real engineering experience**, not tutorial knowledge.
 
 ## Session State
 
-**Last Updated**: 2025-11-27
-**Current Sprint**: Sprint 3 - File Metadata Storage (DynamoDB)
-**Next Step**: Optional Real-World Extras (TTL, pagination, DynamoDB Streams) or continue to Sprint 4 (Cognito Authentication)
+**Last Updated**: 2025-12-08
+**Current Sprint**: Sprint 4 - User Authentication (Cognito)
+**Next Step**: Sprint 4 optional extras (Cognito Groups, MFA, Lambda triggers) OR continue to Sprint 5 (File Download & Sharing)
 
 **Progress**:
 - Sprints: 8 (0-7)
-- Completed: 3 (Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅)
-- Current: Sprint 3 (7/7 main tasks complete ✅, 0/3 optional extras)
-- Sprint 3 completed: 7/7 main tasks ✅
+- Completed: 4 (Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅, Sprint 3 ✅, Sprint 4 ✅)
+- Current: Sprint 4 (7/7 main tasks complete ✅, 0/3 optional extras)
+- Sprint 4 completed: 7/7 main tasks ✅
 
 ---
 
