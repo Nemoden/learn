@@ -1,0 +1,195 @@
+# DevCollab Platform - Docker Compose Setup
+# Services are added progressively as you complete sprints
+
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════════
+  # Databases (Sprint 0 - available from day 1)
+  # ═══════════════════════════════════════════════════════════
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: devcollab-postgres
+    environment:
+      POSTGRES_DB: devcollab
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devuser -d devcollab"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    container_name: devcollab-valkey
+    ports:
+      - "6379:6379"
+    command: valkey-server --requirepass redispass123
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 1: Authentication Service (Python + FastAPI)
+  # Uncomment and build when you reach Sprint 1
+  # ═══════════════════════════════════════════════════════════
+
+  # auth-service:
+  #   build: ./auth-service
+  #   container_name: devcollab-auth-service
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     DATABASE_URL: postgresql://devuser:devpass123@postgres:5432/devcollab
+  #     REDIS_URL: redis://:redispass123@valkey:6379/0
+  #     JWT_SECRET: your-secret-key-change-in-production
+  #     JWT_ALGORITHM: HS256
+  #     ACCESS_TOKEN_EXPIRE_MINUTES: 15
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     valkey:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./auth-service:/app
+  #   command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 2: OAuth Server (TypeScript + Express)
+  # Uncomment and build when you reach Sprint 2
+  # ═══════════════════════════════════════════════════════════
+
+  # oauth-server:
+  #   build: ./oauth-server
+  #   container_name: devcollab-oauth-server
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     DATABASE_URL: postgresql://devuser:devpass123@postgres:5432/devcollab
+  #     REDIS_URL: redis://:redispass123@valkey:6379/1
+  #     JWT_PRIVATE_KEY_PATH: /app/keys/private.pem
+  #     JWT_PUBLIC_KEY_PATH: /app/keys/public.pem
+  #     ISSUER: http://localhost:4000
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     valkey:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./oauth-server:/app
+  #     - ./oauth-server/node_modules:/app/node_modules
+  #   command: npm run dev
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 2: Resource Server (TypeScript + Express)
+  # Uncomment and build when you reach Sprint 2
+  # ═══════════════════════════════════════════════════════════
+
+  # resource-server:
+  #   build: ./resource-server
+  #   container_name: devcollab-resource-server
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     DATABASE_URL: postgresql://devuser:devpass123@postgres:5432/devcollab
+  #     OAUTH_JWKS_URL: http://oauth-server:4000/.well-known/jwks.json
+  #     OAUTH_ISSUER: http://localhost:4000
+  #   depends_on:
+  #     - postgres
+  #     - oauth-server
+  #   volumes:
+  #     - ./resource-server:/app
+  #     - ./resource-server/node_modules:/app/node_modules
+  #   command: npm run dev
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 2: Client App (TypeScript + React/Vue/Vanilla)
+  # Uncomment and build when you reach Sprint 2
+  # ═══════════════════════════════════════════════════════════
+
+  # client-app:
+  #   build: ./client-app
+  #   container_name: devcollab-client-app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     VITE_OAUTH_SERVER_URL: http://localhost:4000
+  #     VITE_RESOURCE_SERVER_URL: http://localhost:5000
+  #     VITE_CLIENT_ID: devcollab-web
+  #     VITE_REDIRECT_URI: http://localhost:3000/callback
+  #   volumes:
+  #     - ./client-app:/app
+  #     - ./client-app/node_modules:/app/node_modules
+  #   command: npm run dev
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 3: MFA Service (Python + FastAPI)
+  # Uncomment and build when you reach Sprint 3
+  # ═══════════════════════════════════════════════════════════
+
+  # mfa-service:
+  #   build: ./mfa-service
+  #   container_name: devcollab-mfa-service
+  #   ports:
+  #     - "8001:8001"
+  #   environment:
+  #     DATABASE_URL: postgresql://devuser:devpass123@postgres:5432/devcollab
+  #     REDIS_URL: redis://:redispass123@valkey:6379/2
+  #     ENCRYPTION_KEY: your-encryption-key-for-totp-secrets
+  #   depends_on:
+  #     - postgres
+  #     - valkey
+  #   volumes:
+  #     - ./mfa-service:/app
+  #   command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+
+  # ═══════════════════════════════════════════════════════════
+  # Sprint 4: Observability Stack (Prometheus + Grafana)
+  # Uncomment when you reach Sprint 4
+  # ═══════════════════════════════════════════════════════════
+
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: devcollab-prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: devcollab-grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     GF_SECURITY_ADMIN_USER: admin
+  #     GF_SECURITY_ADMIN_PASSWORD: admin
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #     - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards
+  #   depends_on:
+  #     - prometheus
+
+volumes:
+  postgres_data:
+  valkey_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: devcollab-network
