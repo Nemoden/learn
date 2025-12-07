@@ -6,6 +6,7 @@ dynamo = boto3.resource("dynamodb")
 
 def lambda_handler(event, context):
     _ = context
+    user_id = event['requestContext']['authorizer']['claims']['sub']
     table_name = os.environ.get("FILES_TABLE")
     if not table_name:
         return {
@@ -19,7 +20,7 @@ def lambda_handler(event, context):
     res = table.get_item(
         Key={
             "fileId": file_id,
-            "userId": "demo-user"
+            "userId": user_id
         }
     )
     if 'Item' not in res:

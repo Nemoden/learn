@@ -867,7 +867,7 @@ You'll have **real engineering experience**, not tutorial knowledge.
 - This file is Claude's script — guide the user, don't just point them to the file
 
 **File references**:
-- AWS docs: `aws-pdfs/` folder
+- AWS docs: `aws-pdfs/` folder (official AWS documentation converted to txt format using pdftotext utility)
 - SDK examples: `aws-doc-sdk-examples/`
 - CLI examples: `/opt/homebrew/share/awscli/examples/{service}/`
 

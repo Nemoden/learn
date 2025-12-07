@@ -11,6 +11,7 @@ def lambda_handler(event, context):
     _ = context
     body = json.loads(event['body'])
     file_name = body.get('fileName', None)
+    user_id = event['requestContext']['authorizer']['claims']['sub']
     if file_name is None:
         return {
             'statusCode': 400,
@@ -46,7 +47,7 @@ def lambda_handler(event, context):
     file_id = str(uuid.uuid4())
     table.put_item(
       Item={
-          'userId': 'demo-user',  # Hardcoded for now (Sprint 4 will use real auth)
+          'userId': user_id,  # Hardcoded for now (Sprint 4 will use real auth)
           'fileId': file_id,
           'fileName': file_name,
           's3Key': upload_prefix,

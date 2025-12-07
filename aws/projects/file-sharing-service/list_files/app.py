@@ -9,6 +9,7 @@ def lambda_handler(event, context):
     Lists files (read from dynamo)
     """
     _, _ = context, event
+    user_id = event['requestContext']['authorizer']['claims']['sub']
     table_name = os.environ["FILES_TABLE"]
     if not table_name:
         return {
@@ -20,7 +21,7 @@ def lambda_handler(event, context):
     res = table.query(
         KeyConditionExpression = "userId = :uid",
         ExpressionAttributeValues = {
-            ":uid": "demo-user"
+            ":uid": user_id
         }
     )
     items = res["Items"]
