@@ -1,1 +1,1 @@
-![Learning Chamber](./coffeeaddict-learning-chamber.png)
+![Knowledge map](.assets/map.png)
