@@ -1,1 +1,1 @@
-![Knowledge map](.assets/map.png)
+![Knowledge map](.assets/map2.png)
