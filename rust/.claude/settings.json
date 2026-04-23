@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": []
+  },
+  "includeCoAuthoredBy": false,
+  "env": {
+    "RUST_BACKTRACE": "1"
+  },
+  "outputStyle": "Learning"
+}

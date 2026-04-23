@@ -1,0 +1,5 @@
+- [2026-04-23] Rust macros — declarative (`macro_rules!`) and procedural (derive macros), when to use each, how serde's `#[derive(Serialize)]` works under the hood
+- [2026-04-23] Unsafe Rust — raw pointers, FFI with C libraries, when unsafe is justified vs avoidable
+- [2026-04-23] Async Rust deep dive — tokio runtime internals, pinning, `Future` trait, `Stream` for async iterators, structured concurrency patterns *(partially covered by logpipe project Sprint 4)*
+- [2026-04-23] WASM with Rust — compiling to WebAssembly via `wasm-pack`, interop with JavaScript, performance-critical browser code
+- [2026-04-23] Rust for CLI tools — `ratatui` for TUI apps, `indicatif` for progress bars, `dialoguer` for interactive prompts, building polished user-facing tools
