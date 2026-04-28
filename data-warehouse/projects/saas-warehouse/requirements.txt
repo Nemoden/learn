@@ -1,4 +1,4 @@
-# Core data libs
+# Core data libs (Units 1-7)
 pyarrow>=15.0.0
 pyiceberg[glue,s3fs,pyarrow]>=0.7.0
 duckdb>=1.0.0
@@ -8,10 +8,12 @@ boto3>=1.34.0
 aws-cdk-lib>=2.140.0
 constructs>=10.0.0
 
-# Modeling layer
-dbt-core>=1.8.0
-dbt-athena-community>=1.8.0
-sqlmesh>=0.100.0
-
 # Dev convenience
 ipython
+
+# Modeling layer — installed in Unit 8 (dbt) and Unit 9 (SQLMesh).
+# Kept out of base requirements because their dep graph collides with
+# pyiceberg/pyarrow versions and forces a deep pip resolve. Use a
+# separate venv per modeling tool, or:
+#   pip install dbt-core dbt-athena-community   # Unit 8
+#   pip install sqlmesh                         # Unit 9
