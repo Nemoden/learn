@@ -78,7 +78,27 @@ Organize by domain, not chronologically. Include "Ready To" section with concret
 
 **Skip when:** Setup is handled by nix flake, or is trivial (one command).
 
-### 13. Inline Examples in Activities
+### 13. "Here we could also use X" per unit
+**Include when:** Topic has a chosen stack with viable alternatives (most Build/Operate topics, some Practice topics with alternative methods).
+**Skip when:** Topic has no real alternatives at the unit level (pure math derivations, history events).
+
+Brief subsection at end of each unit listing 2-5 alternatives with one line each: what they swap for, when you'd actually pick them. The point is recognition, not depth.
+
+Pair with technique #14 (standalone adjacent.md) for the always-available deeper version.
+
+### 14. Standalone adjacent.md reference
+**Include when:** Project has 5+ units AND topic ecosystem is crowded with alternatives (data engineering, web frameworks, ML, cloud, music production).
+**Skip when:** Tight ecosystem with no real alternatives, or short project (3-4 units).
+
+Live at `projects/<project>/adjacent.md`. Organized by category (storage, compute, modeling, BI, etc.). Each entry: one line on what it is, when you'd pick it. Surfaced via `/adjacent` slash command at any time during the project.
+
+### 15. Final adjacent-survey unit
+**Include when:** Project has 7+ units AND topic ecosystem is crowded.
+**Skip when:** Short project, or alternatives are already adequately covered per-unit.
+
+Last unit before "What You'll Know" finale. Format: guided read+discuss, not build. Claude walks user through the categories, asks "would this fit your project better?", user picks 1-2 to add to `to-learn.md`.
+
+### 16. Inline Examples in Activities
 **Include when:** Topic has boilerplate/config/notation that must be exact — getting syntax wrong wastes time on typos, not learning.
   - Build: YAML templates, config files, boilerplate (NOT business logic)
   - Practice: sheet music notation, recipe steps with exact measurements

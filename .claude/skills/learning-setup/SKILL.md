@@ -51,7 +51,8 @@ Create under the learn repo root:
 │       ├── til.md        (capture aha moments)
 │       ├── later.md      (park tangents)
 │       ├── review.md     (spaced-repetition quiz)
-│       └── know.md       (save reference facts)
+│       ├── know.md       (save reference facts)
+│       └── adjacent.md   (browse adjacent-tech / alternatives reference)
 ├── CLAUDE.md
 ├── README.md
 ├── learnings.md           (empty — aha moments accumulate here)
@@ -75,7 +76,7 @@ Optional (ask if relevant):
 - Topic-specific "do not" rules
 - Concept categories organized by functional domain
 
-**Slash commands** — Read [references/commands.md](references/commands.md). Five commands: `/learn`, `/til`, `/later`, `/review`, `/know`. Stable across topics with minor wording tweaks.
+**Slash commands** — Read [references/commands.md](references/commands.md). Six commands: `/learn`, `/til`, `/later`, `/review`, `/know`, `/adjacent`. Stable across topics with minor wording tweaks.
 
 **settings.json**:
 - `"outputStyle": "Learning"` (always)
@@ -109,6 +110,15 @@ Read [references/plan-techniques.md](references/plan-techniques.md) for **option
 - Teaching Instructions section (self-contained)
 - Session State with progress counters
 
+**Anti-tunnel-vision (recommended for any topic with a chosen stack):**
+- Each unit ends with a "Here we could also use X" subsection — adjacent technologies / alternatives that swap for what the unit just taught, with one line on when each would actually be picked
+- Project gets a standalone `adjacent.md` reference file under `projects/<project>/` listing alternatives by category (storage, compute, transformation, BI, etc.)
+- Project's last unit can be an "Adjacent Tech Acknowledgement" survey unit — guided read+discuss instead of build, ending with 1-2 picks added to `to-learn.md`
+- `/adjacent` slash command surfaces this list at any time during the project
+- Cross-pollination cadence baked into Teaching Instructions: present per-unit "Here we could also use X" briefly after main activities; the standalone `adjacent.md` is the always-available deeper reference
+
+This pattern matters because narrow learning produces locked-in engineers. Naming the alternatives (and their use cases) at the moment a concept is taught builds the mental map of where the chosen stack sits.
+
 **Technique defaults by category:**
 
 | Technique | Build | Practice | Understand | Operate |
@@ -121,6 +131,9 @@ Read [references/plan-techniques.md](references/plan-techniques.md) for **option
 | Structured finale | 5+ units | Always (repertoire list) | 5+ units | Rarely |
 | Exercise blocks | Via tests | Core to every session | Core to every module | Via real tasks |
 | Quiz checkpoints | End of unit | End of session | Mid-unit AND end | End of workflow |
+| "Here we could also use X" per unit | Always (technology stacks crowded) | When alternative methods/styles exist | When alternative theories/frameworks exist | Always (tools always have alternatives) |
+| Standalone adjacent.md reference | Always for projects | Optional | Optional | Always for projects |
+| Final adjacent-survey unit | When 5+ units AND crowded ecosystem | Optional | Optional | Optional |
 
 ### Step 6: Verify & Report
 
@@ -131,6 +144,7 @@ List what was created. Remind user:
 4. `/know <fact>` — save reference material
 5. `/later <topic>` — park tangents
 6. `/review` — quiz on accumulated learnings
+7. `/adjacent <project>` — browse adjacent-tech / alternatives at any time
 
 ## Guidelines
 

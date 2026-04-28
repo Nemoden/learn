@@ -84,6 +84,13 @@ Show patterns, NOT full solutions.
 - {{Concrete skill or concept mastered}}
 - {{Another one}}
 
+{{IF chosen stack has alternatives (most Build/Operate topics):
+### Here we could also use X
+- **{{Alternative 1}}** — {{one line: what swap, when picked over chosen stack}}
+- **{{Alternative 2}}** — {{ditto}}
+- {{2-5 entries; keep terse; this is anti-tunnel-vision, not a deep dive — that's adjacent.md}}
+}}
+
 ---
 
 {{END FOR EACH UNIT}}
