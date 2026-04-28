@@ -68,15 +68,15 @@ format!("{} {}", a, b)             // string interpolation
 
 ### Steps
 
-- [ ] Run `cargo new cachebox` inside `projects/cachebox/`, explore generated structure (`Cargo.toml`, `src/main.rs`)
-- [ ] MUST-KNOW: `Cargo.toml` manifest — `[package]`, `[dependencies]`, edition, versioning
-- [ ] MUST-KNOW: `String` vs `&str` — owned vs borrowed strings, when to use each
-- [ ] Write a `main()` that prints a welcome message, run with `cargo run`
-- [ ] MUST-KNOW: `cargo check` (fast) vs `cargo build` (full) vs `cargo run` (build+run)
-- [ ] Add a function `fn greet(name: &str) -> String` — first taste of references
-- [ ] Write a `#[test]` for `greet()` in the same file, run with `cargo test`
-- [ ] Run `cargo clippy` and `cargo fmt` — fix any warnings
-- [ ] MUST-KNOW: Rust compiler errors are your teacher — read them fully, they often contain the fix
+- [x] Run `cargo new cachebox` inside `projects/cachebox/`, explore generated structure (`Cargo.toml`, `src/main.rs`)
+- [x] MUST-KNOW: `Cargo.toml` manifest — `[package]`, `[dependencies]`, edition, versioning
+- [x] MUST-KNOW: `String` vs `&str` — owned vs borrowed strings, when to use each
+- [x] Write a `main()` that prints a welcome message, run with `cargo run`
+- [x] MUST-KNOW: `cargo check` (fast) vs `cargo build` (full) vs `cargo run` (build+run)
+- [x] Add a function `fn greet(name: &str) -> String` — first taste of references
+- [x] Write a `#[test]` for `greet()` in the same file, run with `cargo test`
+- [x] Run `cargo clippy` and `cargo fmt` — fix any warnings
+- [x] MUST-KNOW: Rust compiler errors are your teacher — read them fully, they often contain the fix
 
 ### Outcome
 ✅ **Compilable Rust project with a passing test, formatted and linted** — you have a working cargo workflow
@@ -109,8 +109,8 @@ if let Some(v) = opt { ... }
 
 ### Steps
 
-- [ ] Define `struct Cache` with a `HashMap<String, String>` field
-- [ ] MUST-KNOW: Ownership — each value has exactly one owner. When owner goes out of scope, value is dropped. This prevents use-after-free and double-free bugs.
+- [x] Define `struct Cache` with a `HashMap<String, String>` field
+- [x] MUST-KNOW: Ownership — each value has exactly one owner. When owner goes out of scope, value is dropped. This prevents use-after-free and double-free bugs.
 - [ ] Implement `Cache::new() -> Self`
 - [ ] Implement `Cache::set(&mut self, key: String, value: String)`
 - [ ] MUST-KNOW: `&mut self` — why does `set` need mutable borrow? What happens if you try `&self`?
@@ -551,7 +551,7 @@ After this project, you can:
 
 ## Session State
 
-**Current Sprint:** Not started
-**Current Step:** —
-**Last Updated:** —
-**Progress**: 0/7 sprints complete (+ 1 bonus)
+**Current Sprint:** Sprint 2 — The Store
+**Current Step:** Define `struct Cache` with HashMap
+**Last Updated:** 2026-04-26
+**Progress**: 1/7 sprints complete (+ 1 bonus)

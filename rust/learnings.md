@@ -1,0 +1,3 @@
+- [2026-04-24] Always benchmark Rust with `cargo build --release`, not `cargo build` (dev profile). Dev builds have optimizations off (`opt-level = 0`), release uses `opt-level = 3`. The performance difference can be 10-50x.
+- [2026-04-26] `#[cfg(test)] mod tests` is conditional compilation — the entire test module is stripped from release builds, so it adds zero overhead to your binary.
+- [2026-04-26] `use super::*` inside a test module imports the parent scope, allowing tests to access private functions (like `greet()`). Integration tests in the `tests/` directory can only access `pub` items.
