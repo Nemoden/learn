@@ -1,0 +1,5 @@
+- [2026-04-28] dbt for warehouse modeling (staging → intermediate → marts as code, lineage graph)
+- [2026-04-28] Apache Hudi and Delta Lake — how they differ from Iceberg (table format comparison)
+- [2026-04-28] AWS Glue Jobs (PySpark) for heavier transforms beyond Firehose Lambdas
+- [2026-04-28] Athena performance tuning — file sizing, partition projection, columnar layout impact
+- [2026-04-28] Lakehouse vs warehouse architecture debate — when each wins

@@ -1,0 +1,28 @@
+.direnv/
+.venv/
+.omc/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# CDK
+cdk.out/
+.cdk.staging/
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# SQLMesh
+.cache/
+
+# Local data
+*.parquet
+*.duckdb
+local-data/
+
+# AWS
+.aws-sam/
+samconfig.toml.local
