@@ -4,9 +4,21 @@ struct Cache {
     data: HashMap<String, String>,
 }
 
-// TODO(human): Add an impl block for Cache with a fn new() -> Self
-// Should return a Cache with an empty HashMap
-// Hint: HashMap::new() creates empty map, Self { field: value } constructs the struct
+impl Cache {
+    fn new() -> Self {
+        Self {
+            data: HashMap::new()
+        }
+    }
+    
+    fn set(&mut self, key: &str, value: &str) {
+        self.data.insert(key.to_string(), value.to_string());
+    }
+
+    // TODO(human): Implement get(&self, key: &str) -> Option<&String>
+    // Return a reference to the value if key exists, None otherwise
+    // Hint: HashMap::get(key) already returns Option<&V>
+}
 
 fn main() {
     println!("cachebox v0.1.0");

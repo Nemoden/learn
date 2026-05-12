@@ -111,9 +111,9 @@ if let Some(v) = opt { ... }
 
 - [x] Define `struct Cache` with a `HashMap<String, String>` field
 - [x] MUST-KNOW: Ownership — each value has exactly one owner. When owner goes out of scope, value is dropped. This prevents use-after-free and double-free bugs.
-- [ ] Implement `Cache::new() -> Self`
-- [ ] Implement `Cache::set(&mut self, key: String, value: String)`
-- [ ] MUST-KNOW: `&mut self` — why does `set` need mutable borrow? What happens if you try `&self`?
+- [x] Implement `Cache::new() -> Self`
+- [x] Implement `Cache::set(&mut self, key: String, value: String)`
+- [x] MUST-KNOW: `&mut self` — why does `set` need mutable borrow? What happens if you try `&self`?
 - [ ] Implement `Cache::get(&self, key: &str) -> Option<&String>`
 - [ ] MUST-KNOW: `Option<T>` — Rust's replacement for null. `Some(value)` or `None`. Pattern match with `match` or use `.unwrap()` (but explain when unwrap is OK vs dangerous)
 - [ ] Implement `Cache::delete(&mut self, key: &str) -> bool`
